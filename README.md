@@ -1,4 +1,5 @@
-# BidSecond 🛒🔨
+# BidSecond 🛒🔨 
+**Access Here!** http://bidsecond.infinityfreeapp.com/public/index.html
 
 **BidSecond** is a web-based second-hand item auction platform where users can register, list items, place bids, and compete in real-time to win unique finds. The project is built using PHP and MySQL and is designed for simplicity, transparency, and ease of use.
 
@@ -11,7 +12,6 @@
 - 📊 User dashboard with bidding history
 - 🔒 Secure password hashing
 - 📱 Mobile-responsive interface
-**Access Here!** http://bidsecond.infinityfreeapp.com/public/index.html
 
 ## 🔧 Tech Stack
 
