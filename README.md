@@ -11,6 +11,7 @@
 - 📊 User dashboard with bidding history
 - 🔒 Secure password hashing
 - 📱 Mobile-responsive interface
+**Access Here!** http://bidsecond.infinityfreeapp.com/public/index.html
 
 ## 🔧 Tech Stack
 
