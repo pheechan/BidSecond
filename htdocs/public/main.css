@@ -1,0 +1,69 @@
+/* Reset default margins and paddings */
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: Arial, sans-serif;
+}
+
+/* Set a consistent background color */
+body {
+    background-color: #66bb6a;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* Full viewport height */
+}
+
+/* Wrapper to center content */
+.content-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+}
+
+/* Style for the content box */
+.content-box {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 400px; /* Ensure the box doesn't exceed 400px */
+    text-align: center;
+    box-sizing: border-box; /* Include padding in the width */
+}
+
+/* Headings */
+h1 {
+    color: #66bb6a;
+    margin-bottom: 20px;
+}
+
+/* Input fields */
+input[type="text"], input[type="email"], input[type="password"] {
+    width: 90%; /* Make the input fields take up the full width of the parent container */
+    padding: 10px;
+    margin-top: 5px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box; /* Ensure padding is included in the width */
+}
+
+/* Buttons */
+button {
+    background-color: #66bb6a;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin: 5px;
+}
+
+button:hover {
+    background-color: #57a05a;
+}

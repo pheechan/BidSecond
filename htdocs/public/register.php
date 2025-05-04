@@ -14,16 +14,31 @@ $show_otp_form = false; // Control whether to show the OTP form
 
 if (empty($_POST["send"]) && empty($_POST["verify_otp"]) && empty($_POST["generate_otp"])) {
 ?>
-<form action="register.php" method="POST">
-    <h1>Registration Form</h1>
-    <p>
-        Full Name: <input type="text" name="name" required><br>
-        Email: <input type="email" name="email" required><br>
-        Password: <input type="password" name="password" required><br>
-        <button type="submit" name="send" value="Submit">Register</button>
-        <button type="reset">Reset</button>
-    </p>
-</form>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register</title>
+    <link rel="stylesheet" href="main.css"> <!-- Link to shared CSS -->
+</head>
+<body>
+    <div class="content-wrapper">
+        <div class="content-box">
+            <h1>Register</h1>
+            <form action="register.php" method="POST">
+                <input type="text" name="name" placeholder="Full Name" required>
+                <input type="email" name="email" placeholder="Email" required>
+                <input type="password" name="password" placeholder="Password" required>
+                <div>
+                    <button type="submit" name="send" value="Submit">Register</button>
+                    <button type="reset">Reset</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
 <?php
 } elseif (!empty($_POST["send"])) {
     $name = $_POST["name"];
