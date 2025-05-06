@@ -18,8 +18,9 @@ body {
 /* Wrapper to center content */
 .content-wrapper {
     display: flex;
+    flex-direction: column; /* Stack the logo and the box vertically */
     justify-content: center;
-    align-items: center;
+    align-items: center; /* Center-align both the logo and the box */
     width: 100%;
     height: 100%;
 }
@@ -66,4 +67,67 @@ button {
 
 button:hover {
     background-color: #57a05a;
+}
+
+.success-message {
+    color: green;
+    font-size: 14px;
+    margin-bottom: 15px; /* Add spacing below the message */
+    text-align: center;
+}
+
+/* Info message styling */
+.info-message {
+    color: #333;
+    font-size: 14px;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+/* Error message styling */
+.error-message {
+    color: red;
+    font-size: 12px;
+    margin-top: 5px;
+    text-align: left;
+}
+
+/* Input field with error */
+.input-error {
+    border: 1px solid red;
+    background-color: #ffe6e6;
+}
+
+/* Brand logo styling */
+.brand-logo {
+    display: block;
+    margin: 0 auto 10px; /* Center the logo and add spacing below it */
+    max-width: 400px; /* Adjust the size of the logo */
+    height: auto; /* Maintain aspect ratio */
+}
+
+/* OTP input container */
+.otp-input-container {
+    display: flex;
+    justify-content: center;
+    gap: 10px; /* Space between the boxes */
+    margin-bottom: 20px;
+}
+
+/* Individual OTP boxes */
+.otp-box {
+    width: 40px;
+    height: 50px;
+    font-size: 18px;
+    text-align: center;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.otp-box:focus {
+    border-color: #66bb6a;
+    box-shadow: 0 2px 6px rgba(102, 187, 106, 0.5);
 }

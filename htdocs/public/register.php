@@ -24,15 +24,17 @@ if (empty($_POST["send"]) && empty($_POST["verify_otp"]) && empty($_POST["genera
 </head>
 <body>
     <div class="content-wrapper">
+        <!-- Add the brand logo here -->
+        <img src="images/logo.png" alt="Brand Logo" class="brand-logo">
         <div class="content-box">
-            <h1>Register</h1>
+            <h1>Sign up to BidSecond</h1>
             <form action="register.php" method="POST">
-                <input type="text" name="name" placeholder="Full Name" required>
+                <input type="text" name="name" placeholder="Username" required>
                 <input type="email" name="email" placeholder="Email" required>
                 <input type="password" name="password" placeholder="Password" required>
                 <div>
-                    <button type="submit" name="send" value="Submit">Register</button>
                     <button type="reset">Reset</button>
+                    <button type="submit" name="send" value="Submit">Sign up</button>
                 </div>
             </form>
         </div>
@@ -75,9 +77,9 @@ if (empty($_POST["send"]) && empty($_POST["verify_otp"]) && empty($_POST["genera
                 $mail->Body = "Hello $name,<br>Your OTP is: <b>$otp</b>";
 
                 $mail->send();
-                echo "Registration successful! Check your email for the OTP.<br>";
+                $message = "One Time Password (OTP) has been sent via Email to: <b>$email</b>.<br>Enter the OTP below to verify it.";
             } catch (Exception $e) {
-                echo "Registered, but OTP email failed: {$mail->ErrorInfo}<br>";
+                $message = "Registered, but OTP email failed: {$mail->ErrorInfo}";
             }
 
             $show_otp_form = true; // Show the OTP form after registration
@@ -87,7 +89,7 @@ if (empty($_POST["send"]) && empty($_POST["verify_otp"]) && empty($_POST["genera
         if ($e->getCode() == 1062) { // Error code 1062 is for duplicate entry
             $error_message = "This email is already registered.";
         } else {
-            $error_message = "Failed to register. Error: " . $e->getMessage();
+            $error_message = "Failed to register. Please try again. Error: " . $e->getMessage();
         }
     }
 
@@ -95,7 +97,7 @@ if (empty($_POST["send"]) && empty($_POST["verify_otp"]) && empty($_POST["genera
     $link->close();
 } elseif (!empty($_POST["verify_otp"])) {
     $email = $_POST["email"];
-    $entered_otp = $_POST["otp"];
+    $entered_otp = implode("", $_POST["otp"]); // Combine OTP array into a single string
 
     $link = mysqli_connect("sql210.infinityfree.com", "if0_38762438", "4sigmaboys", "if0_38762438_bidseconddb");
 
@@ -117,7 +119,46 @@ if (empty($_POST["send"]) && empty($_POST["verify_otp"]) && empty($_POST["genera
         $stmt->bind_param("s", $email);
         $stmt->execute();
 
-        echo "Registration complete!";
+        // Display the success page
+        ?>
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Registration Successful</title>
+            <link rel="stylesheet" href="main.css"> <!-- Link to shared CSS -->
+            <script>
+                // Redirect to the home page after 3 seconds
+                setTimeout(function() {
+                    window.location.href = "index.html"; // Replace with your home page URL
+                }, 5000);
+            </script>
+        </head>
+        <body>
+            <div class="content-wrapper">
+                <!-- Add the brand logo here -->
+                <img src="images/logo.png" alt="Brand Logo" class="brand-logo">
+                <div class="content-box">
+                    <h1>Registration Successful!</h1>
+                    <p class="success-message">Your registration is now complete!</p>
+                    <p class="info-message">You will be redirected to our home page in <span id="countdown">5</span> seconds...</p>
+                </div>
+            </div>
+            <script>
+                // Countdown timer for the redirect message
+                let countdown = 5;
+                const countdownElement = document.getElementById("countdown");
+                setInterval(function() {
+                    countdown--;
+                    if (countdownElement) {
+                        countdownElement.textContent = countdown;
+                    }
+                }, 1000);
+            </script>
+        </body>
+        </html>
+        <?php
         $show_otp_form = false; // Do not show the OTP form after successful verification
     } else {
         $error_message = "Invalid OTP. Please try again."; // Set the error message
@@ -159,31 +200,82 @@ if (empty($_POST["send"]) && empty($_POST["verify_otp"]) && empty($_POST["genera
         $mail->Body = "Hello,<br>Your new OTP is: <b>$new_otp</b>";
 
         $mail->send();
-        echo "A new OTP has been sent to your email.<br>";
+        $message = "A new OTP has been sent to your email.";
     } catch (Exception $e) {
-        echo "Failed to send new OTP: {$mail->ErrorInfo}<br>";
+        $message = "Failed to send new OTP: {$mail->ErrorInfo}";
     }
+
+    $show_otp_form = true; // Show the OTP form after generating a new OTP
 
     $stmt->close();
     $link->close();
-
-    $show_otp_form = true; // Show the OTP form after generating a new OTP
 }
 
 // Display the OTP verification form if needed
 if ($show_otp_form || !empty($error_message)) {
 ?>
-<form action="register.php" method="POST">
-    <p>
-        Enter OTP: <input type="text" name="otp"><br>
-        <button type="submit" name="verify_otp" value="Verify">Verify OTP</button>
-        <button type="submit" name="generate_otp" value="Generate">Send New Code</button>
-    </p>
-    <input type="hidden" name="email" value="<?php echo htmlspecialchars($email); ?>">
-    <?php if (!empty($error_message)) { ?>
-        <p style="color: red;"><?php echo $error_message; ?></p>
-    <?php } ?>
-</form>
-<?php
-}
-?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OTP Verification</title>
+    <link rel="stylesheet" href="main.css"> <!-- Link to shared CSS -->
+    <script>
+        function removeOtpRequirement() {
+            document.querySelectorAll('.otp-box').forEach(function(input) {
+                input.removeAttribute('required');
+            });
+        }
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const otpInputs = document.querySelectorAll(".otp-box");
+            otpInputs.forEach((input, index) => {
+                input.addEventListener("input", (e) => {
+                    if (e.target.value.length === 1 && index < otpInputs.length - 1) {
+                        otpInputs[index + 1].focus(); // Move to the next input
+                    }
+                });
+
+                input.addEventListener("keydown", (e) => {
+                    if (e.key === "Backspace" && index > 0 && !e.target.value) {
+                        otpInputs[index - 1].focus(); // Move to the previous input
+                    }
+                });
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="content-wrapper">
+        <!-- Add the brand logo here -->
+        <img src="images/logo.png" alt="Brand Logo" class="brand-logo">
+        <div class="content-box">
+            <h1>Verify OTP</h1>
+            <?php if (!empty($message)) { ?>
+                <p class="info-message"><?php echo $message; ?></p>
+            <?php } ?>
+            <?php if (!empty($error_message)) { ?>
+                <p class="error-message"><?php echo $error_message; ?></p>
+            <?php } ?>
+            <form action="register.php" method="POST" id="otp-form">
+                <div class="otp-input-container">
+                    <input type="text" name="otp[]" maxlength="1" class="otp-box" required>
+                    <input type="text" name="otp[]" maxlength="1" class="otp-box" required>
+                    <input type="text" name="otp[]" maxlength="1" class="otp-box" required>
+                    <input type="text" name="otp[]" maxlength="1" class="otp-box" required>
+                    <input type="text" name="otp[]" maxlength="1" class="otp-box" required>
+                    <input type="text" name="otp[]" maxlength="1" class="otp-box" required>
+                </div>
+                <input type="hidden" name="email" value="<?php echo htmlspecialchars($email); ?>">
+                <div>
+                    <button type="button" name="generate_otp" value="Generate" onclick="removeOtpRequirement()">Send New Code</button>
+                    <button type="submit" name="verify_otp" value="Verify">Verify OTP</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
+<?php } ?>
