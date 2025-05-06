@@ -9,6 +9,8 @@ require 'PHPMailer/src/PHPMailer.php';
 require 'PHPMailer/src/SMTP.php';
 require 'PHPMailer/src/Exception.php';
 
+$config = include(__DIR__ . '/../private/config.php');
+
 $error_message = ""; // Initialize an error message variable
 $show_otp_form = false; // Control whether to show the OTP form
 
@@ -20,7 +22,7 @@ if (empty($_POST["send"]) && empty($_POST["verify_otp"]) && empty($_POST["genera
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register</title>
-    <link rel="stylesheet" href="main.css"> <!-- Link to shared CSS -->
+    <link rel="stylesheet" href="styles/auth.css"> <!-- Link to shared CSS -->
 </head>
 <body>
     <div class="content-wrapper">
@@ -48,7 +50,7 @@ if (empty($_POST["send"]) && empty($_POST["verify_otp"]) && empty($_POST["genera
     $password = password_hash($_POST["password"], PASSWORD_BCRYPT);
     $otp = rand(100000, 999999); // 6-digit OTP
 
-    $link = mysqli_connect("sql210.infinityfree.com", "if0_38762438", "4sigmaboys", "if0_38762438_bidseconddb");
+    $link = mysqli_connect($config['db_host'], $config['db_user'], $config['db_password'], $config['db_name']);
 
     if (!$link) {
         die("Database connection failed: " . mysqli_connect_error());
@@ -65,8 +67,8 @@ if (empty($_POST["send"]) && empty($_POST["verify_otp"]) && empty($_POST["genera
                 $mail->isSMTP();
                 $mail->Host = 'smtp.gmail.com';
                 $mail->SMTPAuth = true;
-                $mail->Username = 'bidsecondhand@gmail.com'; // Your Gmail
-                $mail->Password = 'nqql ezlj jjxk ryey'; // Use an App Password
+                $mail->Username = $config['mail_username']; 
+                $mail->Password = $config['mail_password']; 
                 $mail->SMTPSecure = 'tls';
                 $mail->Port = 587;
 
@@ -99,7 +101,7 @@ if (empty($_POST["send"]) && empty($_POST["verify_otp"]) && empty($_POST["genera
     $email = $_POST["email"];
     $entered_otp = implode("", $_POST["otp"]); // Combine OTP array into a single string
 
-    $link = mysqli_connect("sql210.infinityfree.com", "if0_38762438", "4sigmaboys", "if0_38762438_bidseconddb");
+    $link = mysqli_connect($config['db_host'], $config['db_user'], $config['db_password'], $config['db_name']);
 
     if (!$link) {
         die("Database connection failed: " . mysqli_connect_error());
@@ -127,7 +129,7 @@ if (empty($_POST["send"]) && empty($_POST["verify_otp"]) && empty($_POST["genera
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>Registration Successful</title>
-            <link rel="stylesheet" href="main.css"> <!-- Link to shared CSS -->
+            <link rel="stylesheet" href="styles/auth.css"> <!-- Link to shared CSS -->
             <script>
                 // Redirect to the home page after 3 seconds
                 setTimeout(function() {
@@ -171,7 +173,7 @@ if (empty($_POST["send"]) && empty($_POST["verify_otp"]) && empty($_POST["genera
     $email = $_POST["email"];
     $new_otp = rand(100000, 999999); // Generate a new OTP
 
-    $link = mysqli_connect("sql210.infinityfree.com", "if0_38762438", "4sigmaboys", "if0_38762438_bidseconddb");
+    $link = mysqli_connect($config['db_host'], $config['db_user'], $config['db_password'], $config['db_name']);
 
     if (!$link) {
         die("Database connection failed: " . mysqli_connect_error());
@@ -188,8 +190,8 @@ if (empty($_POST["send"]) && empty($_POST["verify_otp"]) && empty($_POST["genera
         $mail->isSMTP();
         $mail->Host = 'smtp.gmail.com';
         $mail->SMTPAuth = true;
-        $mail->Username = 'bidsecondhand@gmail.com'; // Your Gmail
-        $mail->Password = 'nqql ezlj jjxk ryey'; // Use an App Password
+        $mail->Username = $config['mail_username']; 
+        $mail->Password = $config['mail_password']; 
         $mail->SMTPSecure = 'tls';
         $mail->Port = 587;
 
@@ -220,7 +222,7 @@ if ($show_otp_form || !empty($error_message)) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OTP Verification</title>
-    <link rel="stylesheet" href="main.css"> <!-- Link to shared CSS -->
+    <link rel="stylesheet" href="styles/auth.css"> <!-- Link to shared CSS -->
     <script>
         function removeOtpRequirement() {
             document.querySelectorAll('.otp-box').forEach(function(input) {
