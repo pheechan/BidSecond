@@ -1,0 +1,184 @@
+/* General Styles */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #e8e8e8;
+}
+
+/* Header */
+.banner {
+    background-color: #57a05a;
+    color: white;
+    padding: 28px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px; /* Add spacing between elements */
+    margin: 0;
+}
+
+.logo {
+    display: inline-block;
+    margin: 0; /* Remove auto centering */
+    max-width: 150px; /* Adjust the size of the logo */
+    height: auto;
+}
+
+.logo img {
+    max-width: 250px; /* Resize the logo */
+    height: auto;
+}
+
+.nav-links {
+    display: flex;
+    gap: 15px;
+}
+
+.nav-links a {
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+}
+
+/* Search Bar */
+.search-bar {
+    flex: 1; /* Allow the search bar to take up available space */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    max-width: 600px; /* Set a maximum width for the search bar */
+}
+
+.search-bar input {
+    flex: 1; /* Make the input take up available space */
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px 0 0 5px; /* Rounded corners on the left */
+    margin: 0; /* Remove margin */
+}
+
+.search-bar button {
+    padding: 10px 20px;
+    background-color: white;
+    color: #57a05a;
+    border: none;
+    border-radius: 0 5px 5px 0; /* Rounded corners on the right */
+    cursor: pointer;
+}
+
+/* Slideshow */
+.slideshow-container {
+    position: relative;
+    max-width: 100%;
+    margin: 20px auto;
+}
+
+.mySlides {
+    display: none;
+}
+
+.mySlides img {
+    width: 100%;
+}
+
+.fade {
+    animation-name: fade;
+    animation-duration: 1.5s;
+}
+
+@keyframes fade {
+    from {opacity: .4} 
+    to {opacity: 1}
+}
+
+.dots-container {
+    text-align: center;
+    margin: 10px 0;
+}
+
+.dot {
+    height: 15px;
+    width: 15px;
+    margin: 0 5px;
+    background-color: #ccc;
+    border-radius: 50%;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.active {
+    background-color: #717171;
+}
+
+/* Hot Bids */
+.hot-bids {
+    display: flex;
+    align-items: center;
+    margin: 20px 0;
+}
+
+.hot-bids-container {
+    display: flex;
+    overflow-x: auto;
+    gap: 10px;
+}
+
+.bid-item {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    min-width: 200px;
+    text-align: center;
+}
+
+/* Categories */
+.categories {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
+
+.category-card {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.category-card img {
+    width: 100%;
+    border-radius: 5px;
+}
+
+/* Bidding Items */
+.bidding-items {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
+
+.bidding-item {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.bidding-item img {
+    width: 100%;
+    border-radius: 5px;
+}
+
+/* Footer */
+#footer {
+    background-color: #57a05a;
+    color: white;
+    text-align: center;
+    padding: 10px;
+    margin: 0;
+}
+
