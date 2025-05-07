@@ -1,4 +1,5 @@
 <?php
+session_start();
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
@@ -39,6 +40,7 @@ if (empty($_POST["send"]) && empty($_POST["verify_otp"]) && empty($_POST["genera
                     <button type="submit" name="send" value="Submit">Sign up</button>
                 </div>
             </form>
+            <p class="info-message">Already have an account? <a href="login.php">Sign in</a></p>
         </div>
     </div>
 </body>
@@ -107,11 +109,11 @@ if (empty($_POST["send"]) && empty($_POST["verify_otp"]) && empty($_POST["genera
         die("Database connection failed: " . mysqli_connect_error());
     }
 
-    // Check OTP in the database
-    $stmt = $link->prepare("SELECT otp_code FROM USERS WHERE email = ? AND email_verified = 0");
+    // Fetch OTP and username from the database
+    $stmt = $link->prepare("SELECT otp_code, username FROM USERS WHERE email = ? AND email_verified = 0");
     $stmt->bind_param("s", $email);
     $stmt->execute();
-    $stmt->bind_result($otp_in_db);
+    $stmt->bind_result($otp_in_db, $name); // Fetch both OTP and username
     $stmt->fetch();
 
     if ($entered_otp == $otp_in_db) {
@@ -121,7 +123,14 @@ if (empty($_POST["send"]) && empty($_POST["verify_otp"]) && empty($_POST["genera
         $stmt->bind_param("s", $email);
         $stmt->execute();
 
-        // Display the success page
+        // Store user information in the session (backend process)
+        $_SESSION['user'] = [
+            'name' => $name, // Use the username fetched from the database
+            'email' => $email,
+            'role' => $role,
+        ];
+
+        // Render the success page
         ?>
         <!DOCTYPE html>
         <html lang="en">
@@ -131,9 +140,9 @@ if (empty($_POST["send"]) && empty($_POST["verify_otp"]) && empty($_POST["genera
             <title>Registration Successful</title>
             <link rel="stylesheet" href="styles/auth.css"> <!-- Link to shared CSS -->
             <script>
-                // Redirect to the home page after 3 seconds
+                // Redirect to the home page after 5 seconds
                 setTimeout(function() {
-                    window.location.href = "index.html"; // Replace with your home page URL
+                    window.location.href = "index.php"; // Replace with your home page URL
                 }, 5000);
             </script>
         </head>
