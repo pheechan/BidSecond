@@ -103,10 +103,11 @@ $link->close();
             margin: 0;
             padding: 0;
             font-family: Arial, sans-serif;
+            overflow-x: hidden; /* Prevent horizontal scrolling */
         }
 
         .content-wrapper {
-            padding-top: 20px; /* Reduced padding to move content up */
+            padding-top: 50px; /* Add padding to avoid overlap with the button */
             max-width: 800px;
             margin: 0 auto;
         }
@@ -171,10 +172,33 @@ $link->close();
             font-weight: bold;
             margin-bottom: 20px;
         }
+
+        /* Back to Home Button Styling */
+        .back-to-home-button {
+            display: inline-block;
+            position: absolute; /* Position it at the top-left */
+            top: 45px; /* Adjust the distance from the top */
+            left: 10px; /* Adjust the distance from the left */
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            text-align: center;
+            z-index: 1000; /* Ensure it stays on top of other elements */
+        }
+
+        .back-to-home-button:hover {
+            background-color: #0056b3;
+        }
     </style>
 </head>
 <body>
     <div class="content-wrapper">
+        <!-- Back to Home Button -->
+        <a href="index.php" class="back-to-home-button">Back to Home</a>
+
         <div class="content-box">
             <h1>Create a New Auction</h1>
 
