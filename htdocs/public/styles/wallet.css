@@ -5,6 +5,7 @@ body {
     padding: 0;
 }
 
+/* General Wallet Container Styling */
 .wallet-container {
     max-width: 600px;
     margin: 50px auto;
@@ -32,25 +33,27 @@ h1 {
     margin-bottom: 20px;
 }
 
-.topup-form {
+/* Topup and Withdraw Form Styling */
+form {
     display: flex;
     flex-direction: column;
     gap: 10px;
+    margin-bottom: 20px;
 }
 
-.topup-form label {
+form label {
     font-size: 1em;
     color: #333;
 }
 
-.topup-form input {
+form input {
     padding: 10px;
     font-size: 1em;
     border: 1px solid #ccc;
     border-radius: 4px;
 }
 
-.topup-form button {
+form button {
     padding: 10px;
     font-size: 1em;
     color: #fff;
@@ -60,10 +63,11 @@ h1 {
     cursor: pointer;
 }
 
-.topup-form button:hover {
+form button:hover {
     background-color: #45a049;
 }
 
+/* Confirmation Section Styling */
 .confirmation {
     text-align: center;
     margin-top: 20px;

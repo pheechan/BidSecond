@@ -1,12 +1,18 @@
 <?php
 session_start();
+
 if (!isset($_SESSION['user'])) {
     header("Location: login.php"); // Redirect to login if not logged in
     exit();
 }
 
-$config = include(__DIR__ . '/../private/config.php');
 $user = $_SESSION['user']; // Access user information
+if (!isset($user['user_id'])) {
+    header("Location: login.php");
+    exit();
+}
+
+$config = include(__DIR__ . '/../private/config.php');
 $message = ""; // Message to show after actions
 
 // Connect to the database
@@ -30,12 +36,6 @@ $stmt->close();
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['topup_amount'])) {
     $topup_amount = floatval($_POST['topup_amount']);
     if ($topup_amount > 0) {
-        // Debugging: Check if user_id is set
-        if (!isset($user['user_id'])) {
-            die("Error: User ID is not set in the session.");
-        }
-
-        // Insert into TOPUP table
         $stmt = $link->prepare("INSERT INTO TOPUP (user_id, topup_amount, status) VALUES (?, ?, 0)");
         if (!$stmt) {
             die("Failed to prepare statement: " . $link->error);
@@ -54,14 +54,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['topup_amount'])) {
 
 // Handle Confirmation of Payment
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_payment'])) {
-    // Update TOPUP status to 1
     $stmt = $link->prepare("UPDATE TOPUP SET status = 1 WHERE user_id = ? AND status = 0");
     if (!$stmt) {
         die("Failed to prepare statement: " . $link->error);
     }
     $stmt->bind_param("i", $user['user_id']);
     if ($stmt->execute()) {
-        // Update user's balance
         $stmt = $link->prepare("
             UPDATE USERS u
             JOIN TOPUP t ON u.user_id = t.user_id
@@ -158,14 +156,6 @@ $link->close();
             <input type="number" id="withdraw_amount" name="withdraw_amount" step="0.01" min="0" required>
             <button type="submit">Withdraw</button>
         </form>
-        <?php if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['withdraw_amount'])) { ?>
-            <div class="confirmation">
-                <p>Are you sure you want to withdraw this amount?</p>
-                <form action="wallet.php" method="POST">
-                    <button type="submit" name="confirm_withdraw">Yes, I confirm</button>
-                </form>
-            </div>
-        <?php } ?>
     </div>
 </body>
 </html>
