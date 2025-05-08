@@ -31,10 +31,11 @@ $limit = 10; // Number of records per page
 $offset = isset($_GET['page']) ? ($_GET['page'] - 1) * $limit : 0;
 
 $stmt = $link->prepare("
-    SELECT bh.*, a.title, a.category
+    SELECT bh.auction_id, a.title, a.category, bh.bid_amount, bh.end_time
     FROM BUY_HISTORY bh
     LEFT JOIN AUCTIONS a ON bh.auction_id = a.auction_id
     WHERE bh.user_id = ?
+    ORDER BY bh.end_time DESC
     LIMIT ? OFFSET ?
 ");
 if (!$stmt) {
@@ -47,10 +48,11 @@ $stmt->close();
 
 // Fetch Sell History
 $stmt = $link->prepare("
-    SELECT sh.*, a.title, a.category
+    SELECT sh.auction_id, a.title, a.category, sh.bid_amount, sh.end_time
     FROM SELL_HISTORY sh
     LEFT JOIN AUCTIONS a ON sh.auction_id = a.auction_id
     WHERE sh.user_id = ?
+    ORDER BY sh.end_time DESC
 ");
 if (!$stmt) {
     die("Failed to prepare statement: " . $link->error);

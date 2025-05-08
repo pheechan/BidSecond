@@ -1,0 +1,89 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
+    margin: 0;
+    padding: 0;
+}
+
+.wallet-container {
+    max-width: 600px;
+    margin: 50px auto;
+    background: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    text-align: center;
+    color: #333;
+}
+
+.balance {
+    font-size: 1.5em;
+    text-align: center;
+    margin: 20px 0;
+    color: #4caf50;
+}
+
+.message {
+    text-align: center;
+    color: #ff5722;
+    margin-bottom: 20px;
+}
+
+.topup-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.topup-form label {
+    font-size: 1em;
+    color: #333;
+}
+
+.topup-form input {
+    padding: 10px;
+    font-size: 1em;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.topup-form button {
+    padding: 10px;
+    font-size: 1em;
+    color: #fff;
+    background-color: #4caf50;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.topup-form button:hover {
+    background-color: #45a049;
+}
+
+.confirmation {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.confirmation p {
+    font-size: 1em;
+    color: #333;
+}
+
+.confirmation button {
+    padding: 10px 20px;
+    font-size: 1em;
+    color: #fff;
+    background-color: #2196f3;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.confirmation button:hover {
+    background-color: #1976d2;
+}
