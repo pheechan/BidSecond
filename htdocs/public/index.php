@@ -1,10 +1,29 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 session_start();
 if (!isset($_SESSION['user'])) {
     header("Location: login.php"); // Redirect to login if not logged in
     exit();
 }
 $user = $_SESSION['user']; // Access user information
+
+// Database connection
+$config = include(__DIR__ . '/../private/config.php'); // Load configuration
+
+try {
+    $pdo = new PDO(
+        "mysql:host={$config['db_host']};dbname={$config['db_name']}",
+        $config['db_user'],
+        $config['db_password'],
+        [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, // Enable exceptions for errors
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC, // Fetch results as associative arrays
+        ]
+    );
+} catch (PDOException $e) {
+    die("Database connection failed: " . $e->getMessage());
+}
 ?>
 <!DOCTYPE html>
 <html lang="th">
@@ -26,7 +45,7 @@ $user = $_SESSION['user']; // Access user information
                 <button type="submit">Search</button>
             </div>
             <nav class="nav-links">
-                <a href="#">Sell</a>
+                <a href="sell.php">Sell</a>
                 <a href="wallet.php">Balance</a>
                 <?php if ($user['role'] === 'admin') { ?> <!-- Show Dashboard only for admin -->
                     <a href="#">Dashboard</a>
@@ -71,45 +90,130 @@ $user = $_SESSION['user']; // Access user information
         </div>
 
         <!-- Categories Section -->
+        
         <h2 class="section-title">Categories</h2>
         <div class="categories">
             <div class="category-card">
-                <img src="images/category1.jpg" alt="Category 1">
-                <p>Category 1</p>
+                <a href="category.php?category=Electronics">
+                    
+                    <p>Electronics</p>
+                </a>
             </div>
             <div class="category-card">
-                <img src="images/category2.jpg" alt="Category 2">
-                <p>Category 2</p>
+                <a href="category.php?category=Fashion">
+                    
+                    <p>Fashion</p>
+                </a>
             </div>
             <div class="category-card">
-                <img src="images/category3.jpg" alt="Category 3">
-                <p>Category 3</p>
+                <a href="category.php?category=Home and Garden">
+                    
+                    <p>Home and Garden</p>
+                </a>
             </div>
             <div class="category-card">
-                <img src="images/category4.jpg" alt="Category 4">
-                <p>Category 4</p>
+                <a href="category.php?category=Toys and Games">
+                    
+                    <p>Toys and Games</p>
+                </a>
+            </div>
+            <div class="category-card">
+                <a href="category.php?category=Automotive">
+                    
+                    <p>Automotive</p>
+                </a>
+            </div>
+            <div class="category-card">
+                <a href="category.php?category=Sports and Outdoors">
+                    
+                    <p>Sports and Outdoors</p>
+                </a>
+            </div>
+            <div class="category-card">
+                <a href="category.php?category=Books and Media">
+                    
+                    <p>Books and Media</p>
+                </a>
+            </div>
+            <div class="category-card">
+                <a href="category.php?category=Health and Beauty">
+                    
+                    <p>Health and Beauty</p>
+                </a>
+            </div>
+            <div class="category-card">
+                <a href="category.php?category=Jewelry and Watches">
+                    
+                    <p>Jewelry and Watches</p>
+                </a>
+            </div>
+            <div class="category-card">
+                <a href="category.php?category=Music and Instruments">
+                    
+                    <p>Music and Instruments</p>
+                </a>
+            </div>
+            <div class="category-card">
+                <a href="category.php?category=Collectibles and Antiques">
+                    
+                    <p>Collectibles and Antiques</p>
+                </a>
+            </div>
+            <div class="category-card">
+                <a href="category.php?category=Art and Craft">
+                    
+                    <p>Art and Craft</p>
+                </a>
             </div>
         </div>
 
         <!-- Items on Bidding Section -->
+        <?php
+        // Fetch random active products from the AUCTIONS table
+        $query = "
+            SELECT 
+                auction_id, 
+                title, 
+                image, 
+                start_price, 
+                bid_amount 
+            FROM AUCTIONS 
+            WHERE status = 'active' 
+            ORDER BY RAND() 
+            LIMIT 4
+        ";
+        $stmt = $pdo->prepare($query);
+        if (!$stmt->execute()) {
+            die("Query failed: " . implode(", ", $stmt->errorInfo()));
+        }
+        $stmt->execute();
+        $randomProducts = $stmt->fetchAll();
+        ?>
+        <?php
+        echo "Checkpoint 1"; // Add this after the PHP block
+        ?>
+        <!-- Items on Bidding Section -->
+        <!-- Items on Bidding Section -->
         <h2 class="section-title">Items on Bidding</h2>
         <div class="bidding-items">
-            <div class="bidding-item">
-                <img src="images/item1.jpg" alt="Item 1">
-                <p>Item 1</p>
-            </div>
-            <div class="bidding-item">
-                <img src="images/item2.jpg" alt="Item 2">
-                <p>Item 2</p>
-            </div>
-            <div class="bidding-item">
-                <img src="images/item3.jpg" alt="Item 3">
-                <p>Item 3</p>
-            </div>
-            <div class="bidding-item">
-                <img src="images/item4.jpg" alt="Item 4">
-                <p>Item 4</p>
-            </div>
+            <?php if (count($randomProducts) > 0): ?>
+                <?php foreach ($randomProducts as $product): ?>
+                    <div class="bidding-item">
+                        <a href="Product.php?auction_id=<?php echo $product['auction_id']; ?>">
+                            <?php if (!empty($product['image'])): ?>
+                                <img src="data:image/jpeg;base64,<?php echo base64_encode($product['image']); ?>" alt="<?php echo htmlspecialchars($product['title']); ?>">
+                            <?php else: ?>
+                                <img src="images/no-image.jpg" alt="No Image Available">
+                            <?php endif; ?>
+                            <p><?php echo htmlspecialchars($product['title']); ?></p>
+                            <p>Start Price: $<?php echo number_format($product['start_price'], 2); ?></p>
+                            <p>Current Bid: $<?php echo number_format($product['bid_amount'], 2); ?></p>
+                        </a>
+                    </div>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <p class="no-products-message">No active products available for bidding at the moment. Please check back later!</p>
+            <?php endif; ?>
         </div>
     </main>
 

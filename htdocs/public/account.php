@@ -16,13 +16,13 @@ if (!$link) {
 }
 
 // Fetch user details from the database
-$stmt = $link->prepare("SELECT user_id, username, email, address, balance, created_at, role FROM USERS WHERE email = ?");
+$stmt = $link->prepare("SELECT user_id, username, email, address, balance, created_at, roles FROM USERS WHERE email = ?");
 if (!$stmt) {
     die("Failed to prepare statement: " . $link->error);
 }
 $stmt->bind_param("s", $user['email']);
 $stmt->execute();
-$stmt->bind_result($user_id, $username, $email, $address, $balance, $created_at, $role);
+$stmt->bind_result($user_id, $username, $email, $address, $balance, $created_at, $roles);
 $stmt->fetch();
 $stmt->close();
 

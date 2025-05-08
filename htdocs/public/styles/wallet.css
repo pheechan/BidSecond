@@ -87,3 +87,21 @@ h1 {
 .confirmation button:hover {
     background-color: #1976d2;
 }
+
+/* Back to Home Button */
+.back-to-home-button {
+    display: inline-block;
+    margin-left: auto; /* Push the button to the right */
+    padding: 10px 15px;
+    background-color: #57a05a; /* Green background */
+    color: white; /* White text */
+    text-decoration: none; /* Remove underline */
+    border-radius: 5px; /* Rounded corners */
+    font-size: 14px;
+    font-weight: bold;
+    transition: background-color 0.3s ease; /* Smooth hover effect */
+}
+
+.back-to-home-button:hover {
+    background-color: #45a049; /* Darker green on hover */
+}

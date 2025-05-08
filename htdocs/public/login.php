@@ -18,18 +18,18 @@ if (!empty($_POST["login"])) {
     }
 
     // Check if the email exists and verify the password
-    $stmt = $link->prepare("SELECT username, password_hash, role FROM USERS WHERE email = ?");
+    $stmt = $link->prepare("SELECT user_id, username, password_hash, roles FROM USERS WHERE email = ?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
-    $stmt->bind_result($username, $password_hash, $role);
-    $stmt->fetch();
+    $stmt->bind_result($userid, $username, $password_hash, $roles);
 
-    if ($username && password_verify($password, $password_hash)) {
+    if ($stmt->fetch() && password_verify($password, $password_hash)) {
         // Login successful, store user data in session
         $_SESSION['user'] = [
+            'user_id' => $userid,
             'name' => $username,
             'email' => $email,
-            'role' => $role,
+            'roles' => $roles,
         ];
         header("Location: index.php"); // Redirect to the home page
         exit();
