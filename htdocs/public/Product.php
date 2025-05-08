@@ -56,6 +56,40 @@ $product = $stmt->fetch();
 if (!$product) {
     die("Product not found.");
 }
+
+
+// Handle bid submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bid_amount'])) {
+    $bid_amount = floatval($_POST['bid_amount']);
+
+    // Check if the bid is valid
+    if ($bid_amount < $product['bid_amount'] + $product['min_increment']) {
+        $error = "Your bid must be at least $" . number_format($product['bid_amount'] + $product['min_increment'], 2);
+    } else {
+        // Check user's balance
+        $balance_query = "SELECT balance FROM USERS WHERE user_id = ?";
+        $balance_stmt = $pdo->prepare($balance_query);
+        $balance_stmt->execute([$user['user_id']]);
+        $user_balance = $balance_stmt->fetchColumn();
+
+        if ($user_balance === false) {
+            $error = "Unable to fetch your balance. Please try again.";
+        } elseif ($user_balance < $bid_amount) {
+            $error = "You do not have enough balance to place this bid.";
+        } else {
+            // Update the auction's current bid
+            $update_bid_query = "UPDATE AUCTIONS SET bid_amount = ? WHERE auction_id = ?";
+            $update_bid_stmt = $pdo->prepare($update_bid_query);
+            $update_bid_stmt->execute([$bid_amount, $auction_id]);
+
+            $success = "Your bid has been placed successfully!";
+
+            // Refresh the page to show updated data
+            header("Location: Product.php?auction_id=" . $auction_id);
+            exit();
+        }
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="th">
@@ -114,6 +148,9 @@ if (!$product) {
             </form>
             <?php if (isset($error)): ?>
                 <p style="color: red;"><?php echo htmlspecialchars($error); ?></p>
+            <?php endif; ?>
+            <?php if (isset($success)): ?>
+                <p style="color: green;"><?php echo htmlspecialchars($success); ?></p>
             <?php endif; ?>
         <?php elseif ($product['status'] === 'pending'): ?>
             <p>This auction is pending and cannot accept bids at this time.</p>
