@@ -63,13 +63,13 @@ try {
         <!-- Slideshow Section -->
         <div class="slideshow-container">
             <div class="mySlides fade">
-                <img src="images/promo1.jpg" style="width:100%">
+                <img src="images/promo1.png" style="width:50%">
             </div>
             <div class="mySlides fade">
-                <img src="images/promo2.jpg" style="width:100%">
+                <img src="images/promo2.png" style="width:50%">
             </div>
             <div class="mySlides fade">
-                <img src="images/promo3.jpg" style="width:100%">
+                <img src="images/promo3.png" style="width:50%">
             </div>
         </div>
         <div class="dots-container">
