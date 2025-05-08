@@ -80,13 +80,15 @@ $products = $stmt->fetchAll();
                     <div class="product-card">
                         <a href="Product.php?auction_id=<?php echo $product['auction_id']; ?>">
                             <?php if (!empty($product['image'])): ?>
+                                <!-- Display the image using base64 encoding -->
                                 <img src="data:image/jpeg;base64,<?php echo base64_encode($product['image']); ?>" alt="<?php echo htmlspecialchars($product['title']); ?>">
                             <?php else: ?>
+                                <!-- Fallback image if no image is available -->
                                 <img src="images/no-image.jpg" alt="No Image Available">
                             <?php endif; ?>
                             <h2><?php echo htmlspecialchars($product['title']); ?></h2>
-                            <p>Start Price: $<?php echo number_format($product['start_price'], 2); ?></p>
-                            <p>Current Bid: $<?php echo number_format($product['bid_amount'], 2); ?></p>
+                            <p>Start Price: ฿<?php echo number_format($product['start_price'], 2); ?></p>
+                            <p>Current Bid: ฿<?php echo number_format($product['bid_amount'], 2); ?></p>
                             <p>Ends: <?php echo htmlspecialchars($product['end_time']); ?></p>
                         </a>
                     </div>
