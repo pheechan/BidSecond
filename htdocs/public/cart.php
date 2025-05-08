@@ -30,15 +30,20 @@ try {
 // Fetch pending items for the logged-in user
 $query = "
     SELECT 
-        pt.auction_id,
+        a.title AS auction_title,
         pt.seller_id,
         pt.bid_amount,
         pt.buyer_id,
         pt.address,
         pt.end_time,
-        pt.payment_status
+        pt.payment_status,
+        u.username AS seller_name
     FROM PENDING_TRANSACTIONS pt
-    WHERE pt.buyer_id = ? AND pt.payment_status = 'unpaid'
+    INNER JOIN BUYER b ON pt.buyer_id = b.buyer_id
+    INNER JOIN AUCTIONS a ON pt.auction_id = a.auction_id
+    INNER JOIN SELLER s ON pt.seller_id = s.seller_id
+    INNER JOIN USERS u ON s.user_id = u.user_id
+    WHERE b.user_id = ? AND pt.payment_status = 'unpaid'
 ";
 $stmt = $pdo->prepare($query);
 $stmt->execute([$user['user_id']]);
@@ -51,6 +56,65 @@ $pendingItems = $stmt->fetchAll();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cart - BidSecond</title>
     <link rel="stylesheet" href="styles/main.css">
+    <style>
+        /* Ensure the body and html take up the full height */
+        html, body {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Main content should take up all available space */
+        #main-content {
+            flex: 1;
+        }
+
+        /* Footer stays at the bottom */
+        #footer {
+            text-align: center;
+            padding: 10px;
+            background-color: #57a05a;
+            position: relative;
+            bottom: 0;
+            width: 100%;
+        }
+
+        .cart-items {
+            display: flex;
+            flex-direction: column;
+            gap: 20px; /* Add spacing between boxes */
+            padding: 20px;
+        }
+
+        .cart-item {
+            border: 1px solid #ccc; /* Add a border around the box */
+            border-radius: 10px; /* Rounded corners */
+            padding: 20px; /* Add padding inside the box */
+            background-color: #f9f9f9; /* Light background color */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
+        }
+
+        .cart-item-details p {
+            margin: 5px 0; /* Add spacing between paragraphs */
+            font-size: 16px; /* Adjust font size */
+        }
+
+        .cart-item-details button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background-color: #57a05a; /* Button background color */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .cart-item-details button:hover {
+            background-color: #459048; /* Darker green on hover */
+        }
+    </style>
 </head>
 <body>
     <!-- Header Section -->
@@ -77,10 +141,9 @@ $pendingItems = $stmt->fetchAll();
                 <?php foreach ($pendingItems as $item): ?>
                     <div class="cart-item">
                         <div class="cart-item-details">
-                            <p><strong>Auction ID:</strong> <?php echo htmlspecialchars($item['auction_id']); ?></p>
-                            <p><strong>Seller ID:</strong> <?php echo htmlspecialchars($item['seller_id']); ?></p>
+                            <p><strong>Title:</strong> <?php echo htmlspecialchars($item['auction_title']); ?></p>
+                            <p><strong>Seller Name:</strong> <?php echo htmlspecialchars($item['seller_name']); ?></p>
                             <p><strong>Winning Bid:</strong> ฿<?php echo number_format($item['bid_amount'], 2); ?></p>
-                            <p><strong>Buyer ID:</strong> <?php echo htmlspecialchars($item['buyer_id']); ?></p>
                             <p><strong>Shipping Address:</strong> <?php echo htmlspecialchars($item['address']); ?></p>
                             <p><strong>End Time:</strong> <?php echo htmlspecialchars($item['end_time']); ?></p>
                             <p><strong>Status:</strong> <?php echo ucfirst($item['payment_status']); ?></p>
