@@ -31,14 +31,13 @@ try {
 $query = "
     SELECT 
         pt.auction_id,
-        a.title,
-        a.image,
+        pt.seller_id,
         pt.bid_amount,
+        pt.buyer_id,
         pt.address,
-        pt.payment_status,
-        pt.end_time
+        pt.end_time,
+        pt.payment_status
     FROM PENDING_TRANSACTIONS pt
-    LEFT JOIN AUCTIONS a ON pt.auction_id = a.auction_id
     WHERE pt.buyer_id = ? AND pt.payment_status = 'unpaid'
 ";
 $stmt = $pdo->prepare($query);
@@ -77,19 +76,14 @@ $pendingItems = $stmt->fetchAll();
             <div class="cart-items">
                 <?php foreach ($pendingItems as $item): ?>
                     <div class="cart-item">
-                        <a href="Product.php?auction_id=<?php echo $item['auction_id']; ?>">
-                            <?php if (!empty($item['image'])): ?>
-                                <img src="data:image/jpeg;base64,<?php echo base64_encode($item['image']); ?>" alt="<?php echo htmlspecialchars($item['title']); ?>">
-                            <?php else: ?>
-                                <img src="images/no-image.jpg" alt="No Image Available">
-                            <?php endif; ?>
-                        </a>
                         <div class="cart-item-details">
-                            <h2><?php echo htmlspecialchars($item['title']); ?></h2>
-                            <p>Winning Bid: ฿<?php echo number_format($item['bid_amount'], 2); ?></p>
-                            <p>Shipping Address: <?php echo htmlspecialchars($item['address']); ?></p>
-                            <p>End Time: <?php echo htmlspecialchars($item['end_time']); ?></p>
-                            <p>Status: <?php echo ucfirst($item['payment_status']); ?></p>
+                            <p><strong>Auction ID:</strong> <?php echo htmlspecialchars($item['auction_id']); ?></p>
+                            <p><strong>Seller ID:</strong> <?php echo htmlspecialchars($item['seller_id']); ?></p>
+                            <p><strong>Winning Bid:</strong> ฿<?php echo number_format($item['bid_amount'], 2); ?></p>
+                            <p><strong>Buyer ID:</strong> <?php echo htmlspecialchars($item['buyer_id']); ?></p>
+                            <p><strong>Shipping Address:</strong> <?php echo htmlspecialchars($item['address']); ?></p>
+                            <p><strong>End Time:</strong> <?php echo htmlspecialchars($item['end_time']); ?></p>
+                            <p><strong>Status:</strong> <?php echo ucfirst($item['payment_status']); ?></p>
                             <form action="payment.php" method="POST">
                                 <input type="hidden" name="auction_id" value="<?php echo $item['auction_id']; ?>">
                                 <button type="submit" class="pay-button">Pay Now</button>
