@@ -39,6 +39,7 @@ h1 {
 }
 
 .wallet-form label {
+    margin-top: 15px;
     font-size: 1em;
     color: #333;
 }
@@ -184,4 +185,33 @@ h1 {
     font-size: 14px;
     color: #888;
     margin-left: 10px;
+}
+
+/* Pagination Section */
+.pagination {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.pagination-button {
+    padding: 8px 12px;
+    background-color: #57a05a;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.pagination-button:hover {
+    background-color: #45a049;
+}
+
+.pagination-button.active {
+    background-color: #333;
+    color: white;
+    pointer-events: none;
 }
