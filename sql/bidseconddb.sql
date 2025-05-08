@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: sql210.infinityfree.com
--- Generation Time: May 08, 2025 at 02:09 AM
+-- Generation Time: May 08, 2025 at 04:34 AM
 -- Server version: 10.6.19-MariaDB
 -- PHP Version: 7.2.22
 
@@ -42,6 +42,15 @@ CREATE TABLE `AUCTIONS` (
   `status` enum('pending','active','ended','cancelled','paid','shipped') DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `AUCTIONS`
+--
+
+INSERT INTO `AUCTIONS` (`auction_id`, `seller_id`, `title`, `image`, `category`, `description`, `start_price`, `bid_amount`, `min_increment`, `end_time`, `status`, `created_at`) VALUES
+(1, 1, 'Vintage Watch', NULL, 'Accessories', 'A classic vintage watch in excellent condition.', '100.00', '150.00', '10.00', '2025-05-08 08:07:17', 'active', '2025-05-07 19:00:00'),
+(2, 1, 'Gaming Laptop', NULL, 'Electronics', 'High-performance gaming laptop with RTX 3070 GPU.', '1200.00', '1350.00', '50.00', '2025-05-13 03:00:00', 'pending', '2025-05-08 17:00:00'),
+(3, 1, 'Antique Vase', NULL, 'Home Decor', 'A rare antique vase from the 18th century.', '500.00', '750.00', '25.00', '2025-05-08 08:07:12', 'ended', '2025-05-05 16:00:00');
 
 -- --------------------------------------------------------
 
@@ -91,8 +100,8 @@ CREATE TABLE `BUY_HISTORY` (
 CREATE TABLE `INCOME` (
   `income_id` int(11) NOT NULL,
   `user_id` int(11) DEFAULT NULL,
-  `spend_amount` decimal(10,2) DEFAULT NULL,
-  `spend_date` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `income_amount` decimal(10,2) DEFAULT NULL,
+  `income_date` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -122,6 +131,15 @@ CREATE TABLE `SELLER` (
   `auction_id` int(11) NOT NULL,
   `user_id` int(11) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `SELLER`
+--
+
+INSERT INTO `SELLER` (`seller_id`, `auction_id`, `user_id`) VALUES
+(1, 1, 8),
+(1, 2, 8),
+(1, 3, 8);
 
 -- --------------------------------------------------------
 
@@ -187,6 +205,10 @@ CREATE TABLE `USERS` (
 -- Dumping data for table `USERS`
 --
 
+INSERT INTO `USERS` (`user_id`, `username`, `email`, `password_hash`, `otp_code`, `email_verified`, `created_at`, `address`, `balance`, `role`) VALUES
+(1, 'Siwakorn', 'siwakorn.bubphasawan@outlook.com', 'lol', '915976', 0, '2025-05-07 19:17:14', NULL, NULL, 'user'),
+(4, 'Phee', 'p.chantarusorn@gmail.com', 'lol', '534430', 1, '2025-05-07 21:50:37', '', NULL, 'user'),
+(8, 'Jamal', 'magicakpawee@gmail.com', 'lol', '625442', 1, '2025-05-08 07:59:58', 'ur mom&#039;s crib', NULL, 'admin');
 
 -- --------------------------------------------------------
 
@@ -232,7 +254,7 @@ ALTER TABLE `BUYER`
 -- Indexes for table `BUY_HISTORY`
 --
 ALTER TABLE `BUY_HISTORY`
-  ADD PRIMARY KEY (`user_id`,`auction_id`),
+  ADD PRIMARY KEY (`end_time`) USING BTREE,
   ADD KEY `seller_id` (`seller_id`);
 
 --
@@ -262,7 +284,7 @@ ALTER TABLE `SELLER`
 -- Indexes for table `SELL_HISTORY`
 --
 ALTER TABLE `SELL_HISTORY`
-  ADD PRIMARY KEY (`user_id`,`auction_id`),
+  ADD PRIMARY KEY (`end_time`) USING BTREE,
   ADD KEY `buyer_id` (`buyer_id`);
 
 --
@@ -300,7 +322,7 @@ ALTER TABLE `WITHDRAW`
 -- AUTO_INCREMENT for table `AUCTIONS`
 --
 ALTER TABLE `AUCTIONS`
-  MODIFY `auction_id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `auction_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `BIDS`
@@ -308,17 +330,6 @@ ALTER TABLE `AUCTIONS`
 ALTER TABLE `BIDS`
   MODIFY `bid_id` int(11) NOT NULL AUTO_INCREMENT;
 
---
--- AUTO_INCREMENT for table `INCOME`
---
-ALTER TABLE `INCOME`
-  MODIFY `income_id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `SPEND`
---
-ALTER TABLE `SPEND`
-  MODIFY `spend_id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `TOPUP`
@@ -330,7 +341,7 @@ ALTER TABLE `TOPUP`
 -- AUTO_INCREMENT for table `USERS`
 --
 ALTER TABLE `USERS`
-  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `WITHDRAW`
