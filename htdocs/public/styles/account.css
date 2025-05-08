@@ -1,7 +1,49 @@
+/* Ensure the content starts below the top of the page */
+body {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    background-color: #e8e8e8; /* Optional: Set a background color */
+}
+
+.content-wrapper {
+    padding: 20px; /* Add padding around the content */
+    margin-top: 0; /* Remove static margin */
+    transition: margin-top 0.3s ease; /* Smooth transition for margin changes */
+}
+
+/* Content Box */
+.content-box {
+    background-color: white; /* Set a white background for contrast */
+    border-radius: 10px; /* Add rounded corners */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
+    padding: 20px; /* Add padding inside the box */
+    max-width: 800px; /* Limit the width of the box */
+    margin: 0 auto; /* Center the box horizontally */
+    text-align: center;
+    box-sizing: border-box; /* Include padding in the width calculation */
+    
+}
+
+/* Header Styles */
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-top: 0; /* Remove unnecessary padding */
+}
+
+.header-container h1 {
+    margin: 0;
+    font-size: 24px;
+}
+
 /* Tabs */
 .tabs {
     display: flex;
     margin-bottom: 20px;
+    padding-top: 20px; /* Add padding to ensure tabs are not cut off */
 }
 
 .tab {
@@ -29,18 +71,22 @@
 /* Form Styles */
 .form-group {
     margin-bottom: 15px;
+    text-align: center; /* Center-align the text */
 }
 
 .form-group label {
     display: block;
     margin-bottom: 5px;
+    text-align: center; /* Center-align the label text */
 }
 
+.form-group select,
 .form-group input {
     width: 100%;
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 5px;
+    text-align: center; /* Center-align the input text */
 }
 
 .form-group input[readonly] {
@@ -61,4 +107,87 @@
 .message {
     margin-bottom: 15px;
     color: green;
+}
+
+/* Logout Styles */
+.logout-container {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.logout-button {
+    padding: 10px 20px;
+    background-color: #ff4d4d; /* Red background */
+    color: white; /* White text */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.3s ease; /* Smooth transition for hover effect */
+}
+
+.logout-button:hover {
+    background-color: white; /* Invert colors on hover */
+    color: #ff4d4d; /* Red text */
+    border: 1px solid #ff4d4d; /* Add a red border */
+}
+
+/* History Table */
+.history-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.history-table th, .history-table td {
+    border: 1px solid #ccc;
+    padding: 10px;
+    text-align: left;
+}
+
+.history-table th {
+    background-color: #f1f1f1;
+    font-weight: bold;
+}
+
+.history-table tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+/* Back to Home Button */
+.back-to-home-button {
+    display: inline-block;
+    margin-left: auto; /* Push the button to the right */
+    padding: 10px 15px;
+    background-color: #57a05a; /* Green background */
+    color: white; /* White text */
+    text-decoration: none; /* Remove underline */
+    border-radius: 5px; /* Rounded corners */
+    font-size: 14px;
+    font-weight: bold;
+    transition: background-color 0.3s ease; /* Smooth hover effect */
+}
+
+.back-to-home-button:hover {
+    background-color: #45a049; /* Darker green on hover */
+}
+
+/* Pagination */
+.pagination {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.pagination-button {
+    display: inline-block;
+    padding: 10px 15px;
+    margin: 0 5px;
+    background-color: #57a05a;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+}
+
+.pagination-button:hover {
+    background-color: #45a049;
 }
