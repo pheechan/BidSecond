@@ -70,16 +70,19 @@ body {
 /* Slideshow */
 .slideshow-container {
     position: relative;
-    max-width: 100%;
-    margin: 20px auto;
+    margin: 0 auto; /* Center the slideshow horizontally */
+    width: 50%; /* Adjust the width as needed */
+    overflow: hidden; /* Prevent flickering caused by overflow */
 }
 
 .mySlides {
-    display: none;
+    display: none; /* Hide all slides by default */
+    text-align: center; /* Center the content inside the slides */
 }
 
 .mySlides img {
-    width: 100%;
+    width: 100%; /* Make the images responsive */
+    height: auto; /* Maintain aspect ratio */
 }
 
 .fade {
@@ -93,21 +96,21 @@ body {
 }
 
 .dots-container {
-    text-align: center;
-    margin: 10px 0;
+    text-align: center; /* Center the dots below the slideshow */
+    margin-top: 10px;
 }
 
 .dot {
     height: 15px;
     width: 15px;
     margin: 0 5px;
-    background-color: #ccc;
+    background-color: #bbb;
     border-radius: 50%;
     display: inline-block;
-    cursor: pointer;
+    transition: background-color 0.6s ease;
 }
 
-.active {
+.dot.active {
     background-color: #717171;
 }
 
