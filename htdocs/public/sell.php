@@ -109,11 +109,12 @@ $link->close();
 
         /* Adjust the content-wrapper to prevent the header from being cut off */
         .content-wrapper {
-            margin-top: 100px; /* Reduce margin to prevent excessive spacing */
-            padding-top: 70px; /* Add padding to ensure content starts below the header */
-            width: 100%; /* Full width */
-            margin-left: auto;
-            margin-right: auto;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start; /* Align content to the top */
+            align-items: center;
+            width: 100%;
+            height: 100%;
         }
 
         /* Ensure the content-box is properly spaced */
@@ -224,7 +225,7 @@ $link->close();
 
             <form action="sell.php" method="POST" enctype="multipart/form-data">
                 <div class="form-group">
-                    <label for="title">Auction Title</label>
+                    <label for="title">Auction Title NEGUS</label>
                     <div class="form-group-box">
                         <input type="text" id="title" name="title" placeholder="Enter auction title" required>
                     </div>
