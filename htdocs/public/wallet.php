@@ -30,7 +30,39 @@ $stmt->bind_result($balance);
 $stmt->fetch();
 $stmt->close();
 
-// Hanwallet Submission
+// Fetch wallet history
+$order = isset($_GET['order']) && $_GET['order'] === 'asc' ? 'ASC' : 'DESC';
+
+$query = "
+    SELECT 'Top-Up' AS type, topup_amount AS amount, topup_date AS date
+    FROM TOPUP
+    WHERE user_id = ?
+    UNION ALL
+    SELECT 'Sell' AS type, bid_amount AS amount, end_time AS date
+    FROM SELL_HISTORY
+    WHERE user_id = ?
+    UNION ALL
+    SELECT 'Buy' AS type, -bid_amount AS amount, end_time AS date
+    FROM BUY_HISTORY
+    WHERE user_id = ?
+    UNION ALL
+    SELECT 'Withdraw' AS type, -withdraw_amount AS amount, withdraw_date AS date
+    FROM WITHDRAW
+    WHERE user_id = ?
+    ORDER BY date $order
+";
+
+$stmt = $link->prepare($query);
+if (!$stmt) {
+    die("Failed to prepare statement: " . $link->error);
+}
+$stmt->bind_param("iiii", $user['user_id'], $user['user_id'], $user['user_id'], $user['user_id']);
+$stmt->execute();
+$result = $stmt->get_result();
+$transactions = $result->fetch_all(MYSQLI_ASSOC);
+$stmt->close();
+
+// Handle Topup Submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['topup_amount'])) {
     $topup_amount = floatval($_POST['topup_amount']);
     if ($topup_amount > 0) {
@@ -191,6 +223,35 @@ $link->close();
                 }
             });
         </script>
+
+        <!-- Wallet History -->
+        <div class="wallet-history">
+            <h2>Wallet History</h2>
+            <div class="history-controls">
+                <a href="wallet.php?order=asc" class="history-order-button">Ascending</a>
+                <a href="wallet.php?order=desc" class="history-order-button">Descending</a>
+            </div>
+            <div class="history-list">
+                <?php if (!empty($transactions)) { ?>
+                    <?php foreach ($transactions as $transaction) { ?>
+                        <div class="history-item">
+                            <p class="history-date"><?php echo date("Y-m-d H:i:s", strtotime($transaction['date'])); ?></p>
+                            <p class="history-type">
+                                <?php if ($transaction['amount'] > 0) { ?>
+                                    <span class="history-amount positive">+<?php echo number_format($transaction['amount'], 2); ?></span>
+                                    <span class="history-source">(<?php echo $transaction['type']; ?>)</span>
+                                <?php } else { ?>
+                                    <span class="history-amount negative"><?php echo number_format($transaction['amount'], 2); ?></span>
+                                    <span class="history-source">(<?php echo $transaction['type']; ?>)</span>
+                                <?php } ?>
+                            </p>
+                        </div>
+                    <?php } ?>
+                <?php } else { ?>
+                    <p>No transactions found.</p>
+                <?php } ?>
+            </div>
+        </div>
     </div>
 </body>
 </html>
