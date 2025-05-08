@@ -47,7 +47,7 @@ try {
             <nav class="nav-links">
                 <a href="sell.php">Sell</a>
                 <a href="wallet.php">Balance</a>
-                <?php if ($user['role'] === 'admin') { ?> <!-- Show Dashboard only for admin -->
+                <?php if ($user['roles'] === 'admin') { ?> <!-- Show Dashboard only for admin -->
                     <a href="#">Dashboard</a>
                 <?php } ?>
                 <a href="account.php">Account</a> <!-- Link to account.php -->
