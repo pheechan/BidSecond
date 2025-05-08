@@ -203,8 +203,8 @@ try {
                                 <img src="images/no-image.jpg" alt="No Image Available">
                             <?php endif; ?>
                             <p><?php echo htmlspecialchars($product['title']); ?></p>
-                            <p>Start Price: $<?php echo number_format($product['start_price'], 2); ?></p>
-                            <p>Current Bid: $<?php echo number_format($product['bid_amount'], 2); ?></p>
+                            <p>Start Price: ฿<?php echo number_format($product['start_price'], 2); ?></p>
+                            <p>Current Bid: ฿<?php echo number_format($product['bid_amount'], 2); ?></p>
                         </a>
                     </div>
                 <?php endforeach; ?>
@@ -220,5 +220,55 @@ try {
     </footer>
 
     <script src="scripts/main.js"></script>
+    <script>
+        let slideIndex = 0;
+
+        function showSlides(index = null) {
+            const slides = document.getElementsByClassName("mySlides");
+            const dots = document.getElementsByClassName("dot");
+
+            // If an index is provided (dot clicked), update the slideIndex
+            if (index !== null) {
+                slideIndex = index;
+            } else {
+                // Increment slide index for automatic slideshow
+                slideIndex++;
+                if (slideIndex > slides.length) {
+                    slideIndex = 1; // Reset to the first slide
+                }
+            }
+
+            // Hide all slides
+            for (let i = 0; i < slides.length; i++) {
+                slides[i].style.display = "none";
+            }
+
+            // Remove active class from all dots
+            for (let i = 0; i < dots.length; i++) {
+                dots[i].className = dots[i].className.replace(" active", "");
+            }
+
+            // Show the current slide and activate the corresponding dot
+            slides[slideIndex - 1].style.display = "block";
+            dots[slideIndex - 1].className += " active";
+
+            // Automatically change slides every 3 seconds if no dot is clicked
+            if (index === null) {
+                setTimeout(showSlides, 3000);
+            }
+        }
+
+        // Add click event listeners to dots
+        function setupDots() {
+            const dots = document.getElementsByClassName("dot");
+            for (let i = 0; i < dots.length; i++) {
+                dots[i].addEventListener("click", () => showSlides(i + 1));
+            }
+        }
+
+        // Initialize the slideshow and dots
+        setupDots();
+        showSlides();
+    </script>
 </body>
 </html>
