@@ -59,7 +59,9 @@ $products = $stmt->fetchAll();
     <header id="header">
         <div class="banner">
             <div class="logo">
-                <img src="images/logo.png" alt="BidSecond Logo">
+                <a href="index.php">
+                    <img src="images/logo.png" alt="BidSecond Logo">
+                </a>
             </div>
             <nav class="nav-links">
                 <a href="index.php">Home</a>

@@ -38,7 +38,9 @@ try {
     <header id="header">
         <div class="banner">
             <div class="logo">
-                <img src="images/logo.png" alt="BidSecond Logo">
+                <a href="index.php">
+                    <img src="images/logo.png" alt="BidSecond Logo">
+                </a>
             </div>
             <div class="search-bar">
                 <input type="text" placeholder="Search for items...">
@@ -169,7 +171,7 @@ try {
 
         <!-- Items on Bidding Section -->
         <?php
-        // Fetch random active products from the AUCTIONS table
+        // Fetch all active products from the AUCTIONS table
         $query = "
             SELECT 
                 auction_id, 
@@ -179,20 +181,15 @@ try {
                 bid_amount 
             FROM AUCTIONS 
             WHERE status = 'active' 
-            ORDER BY RAND() 
-            LIMIT 4
+            ORDER BY RAND()
         ";
         $stmt = $pdo->prepare($query);
         if (!$stmt->execute()) {
             die("Query failed: " . implode(", ", $stmt->errorInfo()));
         }
-        $stmt->execute();
         $randomProducts = $stmt->fetchAll();
         ?>
-        <?php
-        echo "Checkpoint 1"; // Add this after the PHP block
-        ?>
-        <!-- Items on Bidding Section -->
+    
         <!-- Items on Bidding Section -->
         <h2 class="section-title">Items on Bidding</h2>
         <div class="bidding-items">
