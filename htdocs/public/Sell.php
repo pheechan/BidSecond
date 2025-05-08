@@ -6,6 +6,16 @@ if (!isset($_SESSION['user'])) {
     exit();
 }
 
+if (!isset($_SESSION['user']['user_id'])) {
+    die("User ID is not set in the session. Please log in again.");
+}
+
+// Debugging session data
+echo '<pre>';
+print_r($_SESSION);
+echo '</pre>';
+exit();
+
 $config = include(__DIR__ . '/../private/config.php');
 $user = $_SESSION['user']; // Access user information
 $message = ""; // Message to show after actions
@@ -36,16 +46,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_auction'])) {
     }
 
     if ($title && $category && $description && $starting_price > 0 && $min_increment > 0 && $end_time && $image) {
-        // Insert into AUCTIONS table
-        $stmt = $link->prepare("INSERT INTO AUCTIONS (seller_id, title, image, category, description, start_price, bid_amount, min_increment, end_time, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-
-        if (!$stmt) {
-            die("Failed to prepare statement: " . $link->error);
-        }
-
-        // Set bid_amount to starting_price and link seller_id
-        $bid_amount = $starting_price;
-
         // Insert into SELLER table and get the seller_id
         $seller_stmt = $link->prepare("INSERT INTO SELLER (user_id) VALUES (?)");
         if (!$seller_stmt) {
@@ -59,10 +59,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_auction'])) {
         }
         $seller_stmt->close();
 
+        // Insert into AUCTIONS table
+        $stmt = $link->prepare("INSERT INTO AUCTIONS (seller_id, title, image, category, description, start_price, bid_amount, min_increment, end_time, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        if (!$stmt) {
+            die("Failed to prepare statement: " . $link->error);
+        }
+
+        // Set bid_amount to starting_price
+        $bid_amount = $starting_price;
+
         // Bind parameters for AUCTIONS table
         $stmt->bind_param("issssdddsss", $seller_id, $title, $image, $category, $description, $starting_price, $bid_amount, $min_increment, $end_time, $status, $created_at);
 
         if ($stmt->execute()) {
+            // Update SELLER table with the auction_id
+            $auction_id = $link->insert_id; // Get the newly created auction_id
+            $update_seller_stmt = $link->prepare("UPDATE SELLER SET auction_id = ? WHERE seller_id = ?");
+            if (!$update_seller_stmt) {
+                die("Failed to prepare update statement: " . $link->error);
+            }
+            $update_seller_stmt->bind_param("ii", $auction_id, $seller_id);
+            $update_seller_stmt->execute();
+            $update_seller_stmt->close();
+
             $message = "Auction created successfully!";
         } else {
             $message = "Failed to create auction.";
