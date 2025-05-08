@@ -214,7 +214,7 @@ $link->close();
 
             <form action="sell.php" method="POST" enctype="multipart/form-data">
                 <div class="form-group">
-                    <label for="title">Auction Title NEGUS</label>
+                    <label for="title">Auction Title</label>
                     <div class="form-group-box">
                         <input type="text" id="title" name="title" placeholder="Enter auction title" required>
                     </div>
