@@ -30,6 +30,38 @@ $stmt->bind_result($balance);
 $stmt->fetch();
 $stmt->close();
 
+// Fetch wallet history
+$order = isset($_GET['order']) && $_GET['order'] === 'asc' ? 'ASC' : 'DESC';
+
+$query = "
+    SELECT 'Top-Up' AS type, topup_amount AS amount, topup_date AS date
+    FROM TOPUP
+    WHERE user_id = ?
+    UNION ALL
+    SELECT 'Sell' AS type, bid_amount AS amount, end_time AS date
+    FROM SELL_HISTORY
+    WHERE user_id = ?
+    UNION ALL
+    SELECT 'Buy' AS type, -bid_amount AS amount, end_time AS date
+    FROM BUY_HISTORY
+    WHERE user_id = ?
+    UNION ALL
+    SELECT 'Withdraw' AS type, -withdraw_amount AS amount, withdraw_date AS date
+    FROM WITHDRAW
+    WHERE user_id = ?
+    ORDER BY date $order
+";
+
+$stmt = $link->prepare($query);
+if (!$stmt) {
+    die("Failed to prepare statement: " . $link->error);
+}
+$stmt->bind_param("iiii", $user['user_id'], $user['user_id'], $user['user_id'], $user['user_id']);
+$stmt->execute();
+$result = $stmt->get_result();
+$transactions = $result->fetch_all(MYSQLI_ASSOC);
+$stmt->close();
+
 // Handle Topup Submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['topup_amount'])) {
     $topup_amount = floatval($_POST['topup_amount']);
@@ -96,30 +128,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['withdraw_amount'])) {
     if ($withdraw_amount > 0) {
         if ($withdraw_amount <= $balance) {
             // Deduct the amount from the user's balance
-            $stmt = $link->prepare("UPDATE USERS SET balance = balance - ? WHERE user_id = ?");
-            if (!$stmt) {
+            $stmt_update_balance = $link->prepare("UPDATE USERS SET balance = balance - ? WHERE user_id = ?");
+            if (!$stmt_update_balance) {
                 die("Failed to prepare statement: " . $link->error);
             }
-            $stmt->bind_param("di", $withdraw_amount, $user['user_id']);
-            if ($stmt->execute()) {
+            $stmt_update_balance->bind_param("di", $withdraw_amount, $user['user_id']);
+            if ($stmt_update_balance->execute()) {
                 // Add record to the WITHDRAW table
-                $stmt = $link->prepare("INSERT INTO WITHDRAW (user_id, withdraw_amount) VALUES (?, ?)");
-                if (!$stmt) {
+                $stmt_insert_withdraw = $link->prepare("INSERT INTO WITHDRAW (user_id, withdraw_amount) VALUES (?, ?)");
+                if (!$stmt_insert_withdraw) {
                     die("Failed to prepare statement: " . $link->error);
                 }
-                $stmt->bind_param("id", $user['user_id'], $withdraw_amount);
-                if ($stmt->execute()) {
+                $stmt_insert_withdraw->bind_param("id", $user['user_id'], $withdraw_amount);
+                if ($stmt_insert_withdraw->execute()) {
                     $message = "Withdrawal successful! Your balance has been updated.";
                 } else {
                     $message = "Failed to record withdrawal.";
                 }
-                $stmt->close();
+                $stmt_insert_withdraw->close();
             } else {
                 $message = "Failed to process withdrawal.";
             }
-            $stmt->close();
+            $stmt_update_balance->close();
+
+            // Redirect to the same page to prevent form resubmission
+            header("Location: wallet.php");
+            exit();
         } else {
-            $message = "You don't have enough money to withdraw.";
+            $message = "Insufficient amount of money.";
         }
     } else {
         $message = "Invalid withdrawal amount.";
@@ -148,14 +184,14 @@ $link->close();
         <?php } ?>
         
         <!-- Topup Form -->
-        <form action="wallet.php" method="POST" class="topup-form">
-            <label for="topup_amount">Topup Amount:</label>
+        <form action="wallet.php" method="POST" class="wallet-form">
+            <label for="topup_amount">Top-Up Amount:</label>
             <input type="number" id="topup_amount" name="topup_amount" step="0.01" min="0" required>
             <button type="submit">Submit</button>
         </form>
         <?php if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['topup_amount'])) { ?>
             <div class="confirmation">
-                <p>Did you complete the transaction via your preferred method?</p>
+                <p>Did you complete the transaction via your preferred method? aka ชำระเงินแล้ว(สมมติ)</p>
                 <form action="wallet.php" method="POST">
                     <button type="submit" name="confirm_payment">Yes, I have</button>
                 </form>
@@ -163,11 +199,59 @@ $link->close();
         <?php } ?>
 
         <!-- Withdraw Form -->
-        <form action="wallet.php" method="POST" class="withdraw-form">
+        <form action="wallet.php" method="POST" class="wallet-form" id="wallet-form">
             <label for="withdraw_amount">Withdraw Amount:</label>
             <input type="number" id="withdraw_amount" name="withdraw_amount" step="0.01" min="0" required>
-            <button type="submit">Withdraw</button>
+            <button type="submit" id="withdraw-button">Withdraw</button>
+            <p id="withdraw-error" style="color: red; display: none;">Insufficient amount of money.</p>
         </form>
+
+        <script>
+            const withdrawInput = document.getElementById('withdraw_amount');
+            const withdrawButton = document.getElementById('withdraw-button');
+            const withdrawError = document.getElementById('withdraw-error');
+            const currentBalance = <?php echo $balance; ?>; // Pass the current balance from PHP
+
+            withdrawInput.addEventListener('input', () => {
+                const withdrawAmount = parseFloat(withdrawInput.value);
+                if (withdrawAmount > currentBalance) {
+                    withdrawError.style.display = 'block'; // Show error message
+                    withdrawButton.disabled = true; // Disable the button
+                } else {
+                    withdrawError.style.display = 'none'; // Hide error message
+                    withdrawButton.disabled = false; // Enable the button
+                }
+            });
+        </script>
+
+        <!-- Wallet History -->
+        <div class="wallet-history">
+            <h2>Wallet History</h2>
+            <div class="history-controls">
+                <a href="wallet.php?order=asc" class="history-order-button">Ascending</a>
+                <a href="wallet.php?order=desc" class="history-order-button">Descending</a>
+            </div>
+            <div class="history-list">
+                <?php if (!empty($transactions)) { ?>
+                    <?php foreach ($transactions as $transaction) { ?>
+                        <div class="history-item">
+                            <p class="history-date"><?php echo date("Y-m-d H:i:s", strtotime($transaction['date'])); ?></p>
+                            <p class="history-type">
+                                <?php if ($transaction['amount'] > 0) { ?>
+                                    <span class="history-amount positive">+<?php echo number_format($transaction['amount'], 2); ?></span>
+                                    <span class="history-source">(<?php echo $transaction['type']; ?>)</span>
+                                <?php } else { ?>
+                                    <span class="history-amount negative"><?php echo number_format($transaction['amount'], 2); ?></span>
+                                    <span class="history-source">(<?php echo $transaction['type']; ?>)</span>
+                                <?php } ?>
+                            </p>
+                        </div>
+                    <?php } ?>
+                <?php } else { ?>
+                    <p>No transactions found.</p>
+                <?php } ?>
+            </div>
+        </div>
     </div>
 </body>
 </html>

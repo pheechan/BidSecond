@@ -32,25 +32,25 @@ h1 {
     margin-bottom: 20px;
 }
 
-.topup-form {
+.wallet-form {
     display: flex;
     flex-direction: column;
     gap: 10px;
 }
 
-.topup-form label {
+.wallet-form label {
     font-size: 1em;
     color: #333;
 }
 
-.topup-form input {
+.wallet-form input {
     padding: 10px;
     font-size: 1em;
     border: 1px solid #ccc;
     border-radius: 4px;
 }
 
-.topup-form button {
+.wallet-form button {
     padding: 10px;
     font-size: 1em;
     color: #fff;
@@ -60,7 +60,7 @@ h1 {
     cursor: pointer;
 }
 
-.topup-form button:hover {
+.wallet-form button:hover {
     background-color: #45a049;
 }
 
@@ -104,4 +104,84 @@ h1 {
 
 .back-to-home-button:hover {
     background-color: #45a049; /* Darker green on hover */
+}
+
+/* Wallet History Section */
+.wallet-history {
+    margin-top: 30px;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.wallet-history h2 {
+    margin-bottom: 20px;
+    font-size: 24px;
+    color: #333;
+}
+
+.history-controls {
+    margin-bottom: 20px;
+}
+
+.history-order-button {
+    margin-right: 10px;
+    padding: 8px 12px;
+    background-color: #57a05a;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.history-order-button:hover {
+    background-color: #45a049;
+}
+
+.history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.history-item {
+    padding: 15px;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.history-date {
+    font-size: 14px;
+    color: #666;
+}
+
+.history-type {
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.history-amount {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.history-amount.positive {
+    color: green;
+}
+
+.history-amount.negative {
+    color: red;
+}
+
+.history-source {
+    font-size: 14px;
+    color: #888;
+    margin-left: 10px;
 }

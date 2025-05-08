@@ -66,19 +66,19 @@ $stmt->close();
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_account'])) {
     $new_username = htmlspecialchars($_POST['username'], ENT_QUOTES, 'UTF-8');
     $new_address = htmlspecialchars($_POST['address'], ENT_QUOTES, 'UTF-8');
-    $new_role = $_POST['role'];
+    $new_roles = $_POST['roles'];
 
-    $stmt = $link->prepare("UPDATE USERS SET username = ?, address = ?, role = ? WHERE user_id = ?");
+    $stmt = $link->prepare("UPDATE USERS SET username = ?, address = ?, roles = ? WHERE user_id = ?");
     if (!$stmt) {
         die("Failed to prepare statement: " . $link->error);
     }
-    $stmt->bind_param("sssi", $new_username, $new_address, $new_role, $user_id);
+    $stmt->bind_param("sssi", $new_username, $new_address, $new_roles, $user_id);
 
     if ($stmt->execute()) {
         $message = "Account information updated successfully! Please refresh the page to see changes.";
         // Update session data
         $_SESSION['user']['name'] = $new_username;
-        $_SESSION['user']['role'] = $new_role;
+        $_SESSION['user']['roles'] = $new_roles;
     } else {
         $message = "Failed to update account information.";
     }
@@ -140,10 +140,10 @@ $link->close();
                         <input type="text" id="created_at" value="<?php echo htmlspecialchars($created_at); ?>" readonly>
                     </div>
                     <div class="form-group">
-                        <label for="role">Role</label>
-                        <select id="role" name="role" required>
-                            <option value="user" <?php echo $role === 'user' ? 'selected' : ''; ?>>User</option>
-                            <option value="admin" <?php echo $role === 'admin' ? 'selected' : ''; ?>>Admin</option>
+                        <label for="roles">Role</label>
+                        <select id="roles" name="roles" required>
+                            <option value="user" <?php echo $roles === 'user' ? 'selected' : ''; ?>>User</option>
+                            <option value="admin" <?php echo $roles === 'admin' ? 'selected' : ''; ?>>Admin</option>
                         </select>
                     </div>
                     <button type="submit" name="update_account" class="update-button">Update</button>
