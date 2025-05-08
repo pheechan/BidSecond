@@ -1,10 +1,29 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 session_start();
 if (!isset($_SESSION['user'])) {
     header("Location: login.php"); // Redirect to login if not logged in
     exit();
 }
 $user = $_SESSION['user']; // Access user information
+
+// Database connection
+$config = include(__DIR__ . '/../private/config.php'); // Load configuration
+
+try {
+    $pdo = new PDO(
+        "mysql:host={$config['db_host']};dbname={$config['db_name']}",
+        $config['db_user'],
+        $config['db_password'],
+        [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, // Enable exceptions for errors
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC, // Fetch results as associative arrays
+        ]
+    );
+} catch (PDOException $e) {
+    die("Database connection failed: " . $e->getMessage());
+}
 ?>
 <!DOCTYPE html>
 <html lang="th">
@@ -164,10 +183,16 @@ $user = $_SESSION['user']; // Access user information
             LIMIT 4
         ";
         $stmt = $pdo->prepare($query);
+        if (!$stmt->execute()) {
+            die("Query failed: " . implode(", ", $stmt->errorInfo()));
+        }
         $stmt->execute();
         $randomProducts = $stmt->fetchAll();
         ?>
-
+        <?php
+        echo "Checkpoint 1"; // Add this after the PHP block
+        ?>
+        <!-- Items on Bidding Section -->
         <!-- Items on Bidding Section -->
         <h2 class="section-title">Items on Bidding</h2>
         <div class="bidding-items">
@@ -187,7 +212,7 @@ $user = $_SESSION['user']; // Access user information
                     </div>
                 <?php endforeach; ?>
             <?php else: ?>
-                <p>No active products available for bidding.</p>
+                <p class="no-products-message">No active products available for bidding at the moment. Please check back later!</p>
             <?php endif; ?>
         </div>
     </main>
