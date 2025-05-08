@@ -17,23 +17,63 @@ if (!$link) {
 
 // Fetch user details from the database
 $stmt = $link->prepare("SELECT user_id, username, email, address, balance, created_at, role FROM USERS WHERE email = ?");
+if (!$stmt) {
+    die("Failed to prepare statement: " . $link->error);
+}
 $stmt->bind_param("s", $user['email']);
 $stmt->execute();
 $stmt->bind_result($user_id, $username, $email, $address, $balance, $created_at, $role);
 $stmt->fetch();
 $stmt->close();
 
+// Pagination for Buy History
+$limit = 10; // Number of records per page
+$offset = isset($_GET['page']) ? ($_GET['page'] - 1) * $limit : 0;
+
+$stmt = $link->prepare("
+    SELECT bh.*, a.title, a.category
+    FROM BUY_HISTORY bh
+    LEFT JOIN AUCTIONS a ON bh.auction_id = a.auction_id
+    WHERE bh.user_id = ?
+    LIMIT ? OFFSET ?
+");
+if (!$stmt) {
+    die("Failed to prepare statement: " . $link->error);
+}
+$stmt->bind_param("iii", $user_id, $limit, $offset);
+$stmt->execute();
+$buy_history = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+$stmt->close();
+
+// Fetch Sell History
+$stmt = $link->prepare("
+    SELECT sh.*, a.title, a.category
+    FROM SELL_HISTORY sh
+    LEFT JOIN AUCTIONS a ON sh.auction_id = a.auction_id
+    WHERE sh.user_id = ?
+");
+if (!$stmt) {
+    die("Failed to prepare statement: " . $link->error);
+}
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$sell_history = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+$stmt->close();
+
 // Handle form submission to update user information
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_account'])) {
-    $new_username = $_POST['username'];
-    $new_address = $_POST['address'];
+    $new_username = htmlspecialchars($_POST['username'], ENT_QUOTES, 'UTF-8');
+    $new_address = htmlspecialchars($_POST['address'], ENT_QUOTES, 'UTF-8');
     $new_role = $_POST['role'];
 
     $stmt = $link->prepare("UPDATE USERS SET username = ?, address = ?, role = ? WHERE user_id = ?");
+    if (!$stmt) {
+        die("Failed to prepare statement: " . $link->error);
+    }
     $stmt->bind_param("sssi", $new_username, $new_address, $new_role, $user_id);
 
     if ($stmt->execute()) {
-        $message = "Account information updated successfully!";
+        $message = "Account information updated successfully! Please refresh the page to see changes.";
         // Update session data
         $_SESSION['user']['name'] = $new_username;
         $_SESSION['user']['role'] = $new_role;
@@ -51,14 +91,17 @@ $link->close();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Account - BidSecond</title>
+    <title><?php echo htmlspecialchars($username); ?>'s Account - BidSecond</title>
     <link rel="stylesheet" href="styles/auth.css"> <!-- Use shared CSS -->
     <link rel="stylesheet" href="styles/account.css"> <!-- Link to the new account-specific CSS -->
 </head>
 <body>
     <div class="content-wrapper">
         <div class="content-box">
-            <h1>Account Settings</h1>
+            <div class="header-container">
+                <h1>My Account</h1>
+                <a href="index.php" class="back-to-home-button">Back to Home</a>
+            </div>
             <div class="tabs">
                 <div class="tab active" onclick="showTab('account-info')">Account Information</div>
                 <div class="tab" onclick="showTab('history')">History</div>
@@ -107,7 +150,89 @@ $link->close();
 
             <!-- History Tab -->
             <div id="history" class="tab-content">
-                <p>History content will go here...</p>
+                <h2>Buy History</h2>
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Auction ID</th>
+                            <th>Auction Title</th>
+                            <th>Category</th>
+                            <th>Bid Amount</th>
+                            <th>End Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if (empty($buy_history)): ?>
+                            <tr>
+                                <td colspan="5" style="text-align: center;">No buy history found.</td>
+                            </tr>
+                        <?php else: ?>
+                            <?php foreach ($buy_history as $row): ?>
+                                <tr>
+                                    <td><?php echo htmlspecialchars($row['auction_id']); ?></td>
+                                    <td><?php echo htmlspecialchars($row['title']); ?></td>
+                                    <td><?php echo htmlspecialchars($row['category']); ?></td>
+                                    <td><?php echo htmlspecialchars($row['bid_amount']); ?></td>
+                                    <td><?php echo htmlspecialchars($row['end_time']); ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+                <?php
+                $total_pages = ceil(count($buy_history) / $limit);
+                $current_page = isset($_GET['page']) ? $_GET['page'] : 1;
+                ?>
+                <div class="pagination">
+                    <?php if ($current_page > 1): ?>
+                        <a href="?page=<?php echo $current_page - 1; ?>" class="pagination-button">Previous</a>
+                    <?php endif; ?>
+                    <?php if ($current_page < $total_pages): ?>
+                        <a href="?page=<?php echo $current_page + 1; ?>" class="pagination-button">Next</a>
+                    <?php endif; ?>
+                </div>
+
+                <h2>Sell History</h2>
+                <table class="history-table">
+                    <thead>
+                        <tr>
+                            <th>Auction ID</th>
+                            <th>Auction Title</th>
+                            <th>Category</th>
+                            <th>Bid Amount</th>
+                            <th>End Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php if (empty($sell_history)): ?>
+                            <tr>
+                                <td colspan="5" style="text-align: center;">No sell history found.</td>
+                            </tr>
+                        <?php else: ?>
+                            <?php foreach ($sell_history as $row): ?>
+                                <tr>
+                                    <td><?php echo htmlspecialchars($row['auction_id']); ?></td>
+                                    <td><?php echo htmlspecialchars($row['title']); ?></td>
+                                    <td><?php echo htmlspecialchars($row['category']); ?></td>
+                                    <td><?php echo htmlspecialchars($row['bid_amount']); ?></td>
+                                    <td><?php echo htmlspecialchars($row['end_time']); ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        <?php endif; ?>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Loading Spinner -->
+            <div id="loading-spinner" style="display: none; text-align: center;">
+                <p>Loading...</p>
+            </div>
+
+            <!-- Logout Button -->
+            <div class="logout-container">
+                <form action="logout.php" method="POST" onsubmit="return confirm('Are you sure you want to log out?');">
+                    <button type="submit" class="logout-button">Logout</button>
+                </form>
             </div>
         </div>
     </div>
@@ -116,13 +241,37 @@ $link->close();
         function showTab(tabId) {
             const tabs = document.querySelectorAll('.tab');
             const tabContents = document.querySelectorAll('.tab-content');
+            const contentWrapper = document.querySelector('.content-wrapper');
+            const loadingSpinner = document.getElementById('loading-spinner');
 
+            // Show loading spinner
+            loadingSpinner.style.display = 'block';
+
+            // Remove active class from all tabs and tab contents
             tabs.forEach(tab => tab.classList.remove('active'));
             tabContents.forEach(content => content.classList.remove('active'));
 
-            document.querySelector(`#${tabId}`).classList.add('active');
-            document.querySelector(`.tab[onclick="showTab('${tabId}')"]`).classList.add('active');
+            // Add active class to the selected tab and its content
+            setTimeout(() => {
+                document.querySelector(`#${tabId}`).classList.add('active');
+                document.querySelector(`.tab[onclick="showTab('${tabId}')"]`).classList.add('active');
+
+                // Adjust margin-top dynamically based on the active tab
+                if (tabId === 'history') {
+                    contentWrapper.style.marginTop = '50px'; // Smaller margin for the History tab
+                } else {
+                    contentWrapper.style.marginTop = '250px'; // Larger margin for the Account Information tab
+                }
+
+                // Hide loading spinner
+                loadingSpinner.style.display = 'none';
+            }, 300); // Simulate a delay for better UX
         }
+
+        // Set default tab on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            showTab('account-info'); // Default to Account Information tab
+        });
     </script>
 </body>
 </html>
