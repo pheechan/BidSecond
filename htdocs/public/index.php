@@ -270,5 +270,15 @@ try {
         setupDots();
         showSlides();
     </script>
+    <script>
+        function scrollHotBids(direction) {
+            const container = document.querySelector(".hot-bids-container");
+            const scrollAmount = 300; // Adjust the scroll amount as needed
+            container.scrollBy({
+                left: direction * scrollAmount,
+                behavior: "smooth",
+            });
+        }
+    </script>
 </body>
 </html>
