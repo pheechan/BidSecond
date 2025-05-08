@@ -28,7 +28,7 @@ try {
 }
 
 // Get the auction_id from the query string
-$auction_id = 5;
+$auction_id = isset($_GET['auction_id']) ? intval($_GET['auction_id']) : 0;
 
 // Fetch product details from the database
 $query = "
@@ -56,32 +56,13 @@ $product = $stmt->fetch();
 if (!$product) {
     die("Product not found.");
 }
-
-// Handle bid submission
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && $product['status'] === 'active') {
-    $bid_amount = floatval($_POST['bid_amount']);
-    $min_bid = $product['bid_amount'] + $product['min_increment'];
-
-    if ($bid_amount >= $min_bid) {
-        // Update the bid amount in the database
-        $updateQuery = "UPDATE AUCTIONS SET bid_amount = ? WHERE auction_id = ?";
-        $updateStmt = $pdo->prepare($updateQuery);
-        $updateStmt->execute([$bid_amount, $auction_id]);
-
-        // Refresh the page to show updated bid
-        header("Location: Product.php?auction_id=$auction_id");
-        exit();
-    } else {
-        $error = "Your bid must be at least " . number_format($min_bid, 2);
-    }
-}
 ?>
 <!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Product Details - BidSecond</title>
+    <title><?php echo htmlspecialchars($product['title']); ?> - BidSecond</title>
     <link rel="stylesheet" href="styles/main.css">
 </head>
 <body>
