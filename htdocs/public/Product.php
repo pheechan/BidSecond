@@ -70,7 +70,9 @@ if (!$product) {
     <header id="header">
         <div class="banner">
             <div class="logo">
-                <img src="images/logo.png" alt="BidSecond Logo">
+                <a href="index.php">
+                    <img src="images/logo.png" alt="BidSecond Logo">
+                </a>
             </div>
             <div class="search-bar">
                 <input type="text" placeholder="Search for items...">
