@@ -1,0 +1,181 @@
+<?php
+session_start();
+if (!isset($_SESSION['user'])) {
+    header("Location: login.php"); // Redirect to login if not logged in
+    exit();
+}
+$user = $_SESSION['user']; // Access user information
+?>
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - BidSecond</title>
+    <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+    <!-- Header Section -->
+    <header id="header">
+        <div class="banner">
+            <div class="logo">
+                <img src="images/logo.png" alt="BidSecond Logo">
+            </div>
+            <div class="search-bar">
+                <input type="text" placeholder="Search for items...">
+                <button type="submit">Search</button>
+            </div>
+            <nav class="nav-links">
+                <a href="#">Sell</a>
+                <a href="wallet.php">Balance</a>
+                <?php if ($user['role'] === 'admin') { ?> <!-- Show Dashboard only for admin -->
+                    <a href="#">Dashboard</a>
+                <?php } ?>
+                <a href="account.php">Account</a> <!-- Link to account.php -->
+                <a href="#">Cart</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main id="main-content">
+        <!-- Slideshow Section -->
+        <div class="slideshow-container">
+            <div class="mySlides fade">
+                <img src="images/promo1.jpg" style="width:100%">
+            </div>
+            <div class="mySlides fade">
+                <img src="images/promo2.jpg" style="width:100%">
+            </div>
+            <div class="mySlides fade">
+                <img src="images/promo3.jpg" style="width:100%">
+            </div>
+        </div>
+        <div class="dots-container">
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+        </div>
+
+        <!-- Hot Bids Section -->
+        <h2 class="section-title">Hot Bids</h2>
+        <div class="hot-bids">
+            <button class="arrow left-arrow" onclick="scrollHotBids(-1)">&#10094;</button>
+            <div class="hot-bids-container">
+                <div class="bid-item">Hot Bid 1</div>
+                <div class="bid-item">Hot Bid 2</div>
+                <div class="bid-item">Hot Bid 3</div>
+                <div class="bid-item">Hot Bid 4</div>
+            </div>
+            <button class="arrow right-arrow" onclick="scrollHotBids(1)">&#10095;</button>
+        </div>
+
+        <!-- Categories Section -->
+        
+        <!-- Categories Section -->
+        <h2 class="section-title">Categories</h2>
+        <div class="categories">
+            <div class="category-card">
+                <a href="category.php?category=Electronics">
+                    <img src="images/electronics.jpg" alt="Electronics">
+                    <p>Electronics</p>
+                </a>
+            </div>
+            <div class="category-card">
+                <a href="category.php?category=Fashion">
+                    <img src="images/fashion.jpg" alt="Fashion">
+                    <p>Fashion</p>
+                </a>
+            </div>
+            <div class="category-card">
+                <a href="category.php?category=Home%20%26%20Garden">
+                    <img src="images/home_garden.jpg" alt="Home & Garden">
+                    <p>Home & Garden</p>
+                </a>
+            </div>
+            <div class="category-card">
+                <a href="category.php?category=Toys%20%26%20Games">
+                    <img src="images/toys_games.jpg" alt="Toys & Games">
+                    <p>Toys & Games</p>
+                </a>
+            </div>
+            <div class="category-card">
+                <a href="category.php?category=Automotive">
+                    <img src="images/automotive.jpg" alt="Automotive">
+                    <p>Automotive</p>
+                </a>
+            </div>
+            <div class="category-card">
+                <a href="category.php?category=Sports%20%26%20Outdoors">
+                    <img src="images/sports_outdoors.jpg" alt="Sports & Outdoors">
+                    <p>Sports & Outdoors</p>
+                </a>
+            </div>
+            <div class="category-card">
+                <a href="category.php?category=Books%20%26%20Media">
+                    <img src="images/books_media.jpg" alt="Books & Media">
+                    <p>Books & Media</p>
+                </a>
+            </div>
+            <div class="category-card">
+                <a href="category.php?category=Health%20%26%20Beauty">
+                    <img src="images/health_beauty.jpg" alt="Health & Beauty">
+                    <p>Health & Beauty</p>
+                </a>
+            </div>
+            <div class="category-card">
+                <a href="category.php?category=Jewelry%20%26%20Watches">
+                    <img src="images/jewelry_watches.jpg" alt="Jewelry & Watches">
+                    <p>Jewelry & Watches</p>
+                </a>
+            </div>
+            <div class="category-card">
+                <a href="category.php?category=Music%20%26%20Instruments">
+                    <img src="images/music_instruments.jpg" alt="Music & Instruments">
+                    <p>Music & Instruments</p>
+                </a>
+            </div>
+            <div class="category-card">
+                <a href="category.php?category=Collectibles%20%26%20Antiques">
+                    <img src="images/collectibles_antiques.jpg" alt="Collectibles & Antiques">
+                    <p>Collectibles & Antiques</p>
+                </a>
+            </div>
+            <div class="category-card">
+                <a href="category.php?category=Art%20%26%20Craft">
+                    <img src="images/art_craft.jpg" alt="Art & Craft">
+                    <p>Art & Craft</p>
+                </a>
+            </div>
+        </div>
+
+        <!-- Items on Bidding Section -->
+        <h2 class="section-title">Items on Bidding</h2>
+        <div class="bidding-items">
+            <div class="bidding-item">
+                <img src="images/item1.jpg" alt="Item 1">
+                <p>Item 1</p>
+            </div>
+            <div class="bidding-item">
+                <img src="images/item2.jpg" alt="Item 2">
+                <p>Item 2</p>
+            </div>
+            <div class="bidding-item">
+                <img src="images/item3.jpg" alt="Item 3">
+                <p>Item 3</p>
+            </div>
+            <div class="bidding-item">
+                <img src="images/item4.jpg" alt="Item 4">
+                <p>Item 4</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer id="footer">
+        <p>&copy; 2025 BidSecond. All rights reserved.</p>
+    </footer>
+
+    <script src="scripts/main.js"></script>
+</body>
+</html>
