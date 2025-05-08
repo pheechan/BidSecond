@@ -99,6 +99,7 @@ $link->close();
     <link rel="stylesheet" href="styles/auth.css"> <!-- Use shared CSS -->
     <link rel="stylesheet" href="styles/sell.css"> <!-- Add sell-specific CSS -->
     <style>
+        /* Ensure the body starts from the top */
         body {
             margin: 0;
             padding: 0;
@@ -106,18 +107,24 @@ $link->close();
             overflow-x: hidden; /* Prevent horizontal scrolling */
         }
 
+        /* Adjust the content-wrapper to prevent the header from being cut off */
         .content-wrapper {
-            padding-top: 50px; /* Add padding to avoid overlap with the button */
-            max-width: 800px;
-            margin: 0 auto;
+            margin-top: 100px; /* Reduce margin to prevent excessive spacing */
+            padding-top: 70px; /* Add padding to ensure content starts below the header */
+            width: 100%; /* Full width */
+            margin-left: auto;
+            margin-right: auto;
         }
 
+        /* Ensure the content-box is properly spaced */
         .content-box {
             background-color: #fff;
             padding: 20px;
             border: 1px solid #ddd;
             border-radius: 5px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            width: 90%; /* Adjust width to leave some margin on the sides */
+            margin: 0 auto; /* Center the content horizontally */
         }
 
         .form-group {
@@ -176,8 +183,8 @@ $link->close();
         /* Back to Home Button Styling */
         .back-to-home-button {
             display: inline-block;
-            position: absolute; /* Position it at the top-left */
-            top: 45px; /* Adjust the distance from the top */
+            position: fixed; /* Fix the button to the top-left */
+            top: 10px; /* Adjust the distance from the top */
             left: 10px; /* Adjust the distance from the left */
             padding: 10px 20px;
             background-color: #007bff;
@@ -191,6 +198,15 @@ $link->close();
 
         .back-to-home-button:hover {
             background-color: #0056b3;
+        }
+
+        /* Image preview container adjustments */
+        #image-preview-container {
+            margin-top: 10px; /* Add space above the preview */
+            max-height: 200px; /* Limit the height of the preview */
+            overflow-y: auto; /* Allow scrolling if the image is too large */
+            position: static; /* Ensure it stays in the normal document flow */
+            display: block; /* Ensure it takes up space */
         }
     </style>
 </head>
@@ -219,7 +235,7 @@ $link->close();
                     <label for="picture">Insert Picture</label>
                     <div class="form-group-box">
                         <input type="file" id="picture" name="picture" accept="image/*" required onchange="previewImage(event)">
-                        <div id="image-preview-container" style="margin-top: 10px; max-height: 200px; overflow-y: auto; position: relative;">
+                        <div id="image-preview-container">
                             <div id="image-preview">
                                 <!-- Image preview will be displayed here -->
                             </div>
