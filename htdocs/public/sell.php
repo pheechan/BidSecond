@@ -6,6 +6,10 @@ if (!isset($_SESSION['user'])) {
     exit();
 }
 
+if (!isset($_SESSION['user']['user_id'])) {
+    die("User ID is not set in the session. Please log in again.");
+}
+
 $config = include(__DIR__ . '/../private/config.php');
 $user = $_SESSION['user']; // Access user information
 $message = ""; // Message to show after actions
@@ -36,16 +40,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_auction'])) {
     }
 
     if ($title && $category && $description && $starting_price > 0 && $min_increment > 0 && $end_time && $image) {
-        // Insert into AUCTIONS table
-        $stmt = $link->prepare("INSERT INTO AUCTIONS (seller_id, title, image, category, description, start_price, bid_amount, min_increment, end_time, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-
-        if (!$stmt) {
-            die("Failed to prepare statement: " . $link->error);
-        }
-
-        // Set bid_amount to starting_price and link seller_id
-        $bid_amount = $starting_price;
-
         // Insert into SELLER table and get the seller_id
         $seller_stmt = $link->prepare("INSERT INTO SELLER (user_id) VALUES (?)");
         if (!$seller_stmt) {
@@ -59,10 +53,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_auction'])) {
         }
         $seller_stmt->close();
 
+        // Insert into AUCTIONS table
+        $stmt = $link->prepare("INSERT INTO AUCTIONS (seller_id, title, image, category, description, start_price, bid_amount, min_increment, end_time, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        if (!$stmt) {
+            die("Failed to prepare statement: " . $link->error);
+        }
+
+        // Set bid_amount to starting_price
+        $bid_amount = $starting_price;
+
         // Bind parameters for AUCTIONS table
         $stmt->bind_param("issssdddsss", $seller_id, $title, $image, $category, $description, $starting_price, $bid_amount, $min_increment, $end_time, $status, $created_at);
 
         if ($stmt->execute()) {
+            // Update SELLER table with the auction_id
+            $auction_id = $link->insert_id; // Get the newly created auction_id
+            $update_seller_stmt = $link->prepare("UPDATE SELLER SET auction_id = ? WHERE seller_id = ?");
+            if (!$update_seller_stmt) {
+                die("Failed to prepare update statement: " . $link->error);
+            }
+            $update_seller_stmt->bind_param("ii", $auction_id, $seller_id);
+            $update_seller_stmt->execute();
+            $update_seller_stmt->close();
+
             $message = "Auction created successfully!";
         } else {
             $message = "Failed to create auction.";
@@ -90,10 +103,11 @@ $link->close();
             margin: 0;
             padding: 0;
             font-family: Arial, sans-serif;
+            overflow-x: hidden; /* Prevent horizontal scrolling */
         }
 
         .content-wrapper {
-            padding-top: 20px; /* Reduced padding to move content up */
+            padding-top: 50px; /* Add padding to avoid overlap with the button */
             max-width: 800px;
             margin: 0 auto;
         }
@@ -158,10 +172,33 @@ $link->close();
             font-weight: bold;
             margin-bottom: 20px;
         }
+
+        /* Back to Home Button Styling */
+        .back-to-home-button {
+            display: inline-block;
+            position: absolute; /* Position it at the top-left */
+            top: 45px; /* Adjust the distance from the top */
+            left: 10px; /* Adjust the distance from the left */
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            text-align: center;
+            z-index: 1000; /* Ensure it stays on top of other elements */
+        }
+
+        .back-to-home-button:hover {
+            background-color: #0056b3;
+        }
     </style>
 </head>
 <body>
     <div class="content-wrapper">
+        <!-- Back to Home Button -->
+        <a href="index.php" class="back-to-home-button">Back to Home</a>
+
         <div class="content-box">
             <h1>Create a New Auction</h1>
 
