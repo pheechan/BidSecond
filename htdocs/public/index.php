@@ -27,7 +27,7 @@ $user = $_SESSION['user']; // Access user information
             </div>
             <nav class="nav-links">
                 <a href="#">Sell</a>
-                <a href="#">Balance</a>
+                <a href="wallet.php">Balance</a>
                 <?php if ($user['role'] === 'admin') { ?> <!-- Show Dashboard only for admin -->
                     <a href="#">Dashboard</a>
                 <?php } ?>
