@@ -5,7 +5,6 @@ body {
     padding: 0;
 }
 
-/* General Wallet Container Styling */
 .wallet-container {
     max-width: 600px;
     margin: 50px auto;
@@ -33,27 +32,25 @@ h1 {
     margin-bottom: 20px;
 }
 
-/* Topup and Withdraw Form Styling */
-form {
+.topup-form {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    margin-bottom: 20px;
 }
 
-form label {
+.topup-form label {
     font-size: 1em;
     color: #333;
 }
 
-form input {
+.topup-form input {
     padding: 10px;
     font-size: 1em;
     border: 1px solid #ccc;
     border-radius: 4px;
 }
 
-form button {
+.topup-form button {
     padding: 10px;
     font-size: 1em;
     color: #fff;
@@ -63,11 +60,10 @@ form button {
     cursor: pointer;
 }
 
-form button:hover {
+.topup-form button:hover {
     background-color: #45a049;
 }
 
-/* Confirmation Section Styling */
 .confirmation {
     text-align: center;
     margin-top: 20px;
@@ -90,4 +86,22 @@ form button:hover {
 
 .confirmation button:hover {
     background-color: #1976d2;
+}
+
+/* Back to Home Button */
+.back-to-home-button {
+    display: inline-block;
+    margin-left: auto; /* Push the button to the right */
+    padding: 10px 15px;
+    background-color: #57a05a; /* Green background */
+    color: white; /* White text */
+    text-decoration: none; /* Remove underline */
+    border-radius: 5px; /* Rounded corners */
+    font-size: 14px;
+    font-weight: bold;
+    transition: background-color 0.3s ease; /* Smooth hover effect */
+}
+
+.back-to-home-button:hover {
+    background-color: #45a049; /* Darker green on hover */
 }

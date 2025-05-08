@@ -1,18 +1,16 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 session_start();
-
 if (!isset($_SESSION['user'])) {
     header("Location: login.php"); // Redirect to login if not logged in
     exit();
 }
 
-$user = $_SESSION['user']; // Access user information
-if (!isset($user['user_id'])) {
-    header("Location: login.php");
-    exit();
-}
+
 
 $config = include(__DIR__ . '/../private/config.php');
+$user = $_SESSION['user']; // Access user information
 $message = ""; // Message to show after actions
 
 // Connect to the database
@@ -36,7 +34,7 @@ $stmt->close();
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['topup_amount'])) {
     $topup_amount = floatval($_POST['topup_amount']);
     if ($topup_amount > 0) {
-        $stmt = $link->prepare("INSERT INTO TOPUP (user_id, topup_amount, status) VALUES (?, ?, 0)");
+        $stmt = $link->prepare("INSERT INTO TOPUP (user_id, topup_amount, status, topup_date) VALUES (?, ?, 0, NOW())");
         if (!$stmt) {
             die("Failed to prepare statement: " . $link->error);
         }
@@ -54,17 +52,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['topup_amount'])) {
 
 // Handle Confirmation of Payment
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_payment'])) {
+    // Update TOPUP status to 1
     $stmt = $link->prepare("UPDATE TOPUP SET status = 1 WHERE user_id = ? AND status = 0");
     if (!$stmt) {
         die("Failed to prepare statement: " . $link->error);
     }
     $stmt->bind_param("i", $user['user_id']);
     if ($stmt->execute()) {
+        // Update user's balance using only the most recent topup based on date
         $stmt = $link->prepare("
             UPDATE USERS u
-            JOIN TOPUP t ON u.user_id = t.user_id
+            JOIN (
+                SELECT user_id, topup_amount
+                FROM TOPUP
+                WHERE user_id = ? AND status = 1
+                ORDER BY topup_date DESC
+                LIMIT 1
+            ) t ON u.user_id = t.user_id
             SET u.balance = u.balance + t.topup_amount
-            WHERE t.user_id = ? AND t.status = 1
         ");
         if (!$stmt) {
             die("Failed to prepare statement: " . $link->error);
@@ -76,6 +81,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['confirm_payment'])) {
             $message = "Failed to update balance.";
         }
         $stmt->close();
+
+        // Redirect to the same page to prevent form resubmission
+        header("Location: wallet.php");
+        exit();
     } else {
         $message = "Failed to confirm payment.";
     }
@@ -129,6 +138,9 @@ $link->close();
 </head>
 <body>
     <div class="wallet-container">
+        <!-- Back to Home Button -->
+        <a href="index.php" class="back-to-home-button">Back to Home</a>
+
         <h1>My Wallet</h1>
         <p class="balance">Current Balance: $<?php echo number_format($balance, 2); ?></p>
         <?php if (!empty($message)) { ?>
