@@ -190,7 +190,12 @@ try {
         $randomProducts = $stmt->fetchAll();
         ?>
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
     
+=======
+        
+        
+>>>>>>> Stashed changes
 =======
         
         
