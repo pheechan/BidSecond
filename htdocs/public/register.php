@@ -110,7 +110,7 @@ if (empty($_POST["send"]) && empty($_POST["verify_otp"]) && empty($_POST["genera
     }
 
     // Fetch OTP and username from the database
-    $stmt = $link->prepare("SELECT otp_code, username FROM USERS WHERE email = ? AND email_verified = 0");
+    $stmt = $link->prepare("SELECT otp_code, username, role FROM USERS WHERE email = ? AND email_verified = 0");
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $stmt->bind_result($otp_in_db, $name); // Fetch both OTP and username
