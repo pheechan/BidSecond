@@ -1,6 +1,4 @@
 <?php
-// filepath: c:\Users\magic\Desktop\BidSecond\htdocs\public\index.php
-
 session_start();
 
 // Check if the user is logged in
@@ -13,13 +11,69 @@ if (!isset($_SESSION['user'])) {
 $user = $_SESSION['user'];
 
 // Database connection
+$config = include(__DIR__ . '/../private/config.php'); // Load configuration
+
 try {
-    $pdo = new PDO('mysql:host=localhost;dbname=if0_38762438_bidseconddb', 'username', 'password', [
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, // Enable exceptions for errors
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC, // Fetch results as associative arrays
-    ]);
+    $pdo = new PDO(
+        "mysql:host={$config['db_host']};dbname={$config['db_name']}",
+        $config['db_user'],
+        $config['db_password'],
+        [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, // Enable exceptions for errors
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC, // Fetch results as associative arrays
+        ]
+    );
 } catch (PDOException $e) {
     die("Database connection failed: " . $e->getMessage());
+}
+
+// Get the auction_id from the query string
+$auction_id = 5;
+
+// Fetch product details from the database
+$query = "
+    SELECT 
+        a.title, 
+        a.category, 
+        a.image, 
+        a.start_price, 
+        a.bid_amount, 
+        a.min_increment, 
+        a.description, 
+        a.end_time, 
+        a.created_at, 
+        a.status, 
+        u.username AS seller_name 
+    FROM AUCTIONS a
+    LEFT JOIN SELLER s ON a.seller_id = s.seller_id
+    LEFT JOIN USERS u ON s.user_id = u.user_id
+    WHERE a.auction_id = ?
+";
+$stmt = $pdo->prepare($query);
+$stmt->execute([$auction_id]);
+$product = $stmt->fetch();
+
+if (!$product) {
+    die("Product not found.");
+}
+
+// Handle bid submission
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && $product['status'] === 'active') {
+    $bid_amount = floatval($_POST['bid_amount']);
+    $min_bid = $product['bid_amount'] + $product['min_increment'];
+
+    if ($bid_amount >= $min_bid) {
+        // Update the bid amount in the database
+        $updateQuery = "UPDATE AUCTIONS SET bid_amount = ? WHERE auction_id = ?";
+        $updateStmt = $pdo->prepare($updateQuery);
+        $updateStmt->execute([$bid_amount, $auction_id]);
+
+        // Refresh the page to show updated bid
+        header("Location: Product.php?auction_id=$auction_id");
+        exit();
+    } else {
+        $error = "Your bid must be at least " . number_format($min_bid, 2);
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -27,7 +81,7 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home - BidSecond</title>
+    <title>Product Details - BidSecond</title>
     <link rel="stylesheet" href="styles/main.css">
 </head>
 <body>
@@ -42,7 +96,7 @@ try {
                 <button type="submit">Search</button>
             </div>
             <nav class="nav-links">
-                <a href="#">Sell</a>
+                <a href="Sell.php">Sell</a>
                 <a href="#">Balance</a>
                 <?php if ($user['role'] === 'admin') { ?> <!-- Show Dashboard only for admin -->
                     <a href="#">Dashboard</a>
@@ -55,85 +109,41 @@ try {
 
     <!-- Main Content -->
     <main id="main-content">
-        <!-- Slideshow Section -->
-        <div class="slideshow-container">
-            <div class="mySlides fade">
-                <img src="images/promo1.jpg" style="width:100%">
-            </div>
-            <div class="mySlides fade">
-                <img src="images/promo2.jpg" style="width:100%">
-            </div>
-            <div class="mySlides fade">
-                <img src="images/promo3.jpg" style="width:100%">
-            </div>
-        </div>
-        <div class="dots-container">
-            <span class="dot"></span>
-            <span class="dot"></span>
-            <span class="dot"></span>
-        </div>
+        <h1><?php echo htmlspecialchars($product['title']); ?></h1>
+        <p><strong>Category:</strong> <?php echo htmlspecialchars($product['category']); ?></p>
+        <p><strong>Seller:</strong> <?php echo htmlspecialchars($product['seller_name']); ?></p>
+        <p><strong>Description:</strong> <?php echo nl2br(htmlspecialchars($product['description'])); ?></p>
+        <p><strong>Start Price:</strong> $<?php echo number_format($product['start_price'], 2); ?></p>
+        <p><strong>Current Bid:</strong> $<?php echo number_format($product['bid_amount'], 2); ?></p>
+        <p><strong>Minimum Increment:</strong> $<?php echo number_format($product['min_increment'], 2); ?></p>
+        <p><strong>ราคาเสนอขั้นต่ำ:</strong> $<?php echo number_format($product['bid_amount'] + $product['min_increment'], 2); ?></p>
+        <p><strong>End Time:</strong> <?php echo htmlspecialchars($product['end_time']); ?></p>
+        <p><strong>Created At:</strong> <?php echo htmlspecialchars($product['created_at']); ?></p>
+        <?php if (!empty($product['image'])): ?>
+            <img src="data:image/jpeg;base64,<?php echo base64_encode($product['image']); ?>" alt="Product Image" style="max-width: 100%; height: auto;">
+        <?php else: ?>
+            <p>No image available for this product.</p>
+        <?php endif; ?>
 
-        <!-- Hot Bids Section -->
-        <h2 class="section-title">Hot Bids</h2>
-        <div class="hot-bids">
-            <button class="arrow left-arrow" onclick="scrollHotBids(-1)">&#10094;</button>
-            <div class="hot-bids-container">
-                <div class="bid-item">Hot Bid 1</div>
-                <div class="bid-item">Hot Bid 2</div>
-                <div class="bid-item">Hot Bid 3</div>
-                <div class="bid-item">Hot Bid 4</div>
-            </div>
-            <button class="arrow right-arrow" onclick="scrollHotBids(1)">&#10095;</button>
-        </div>
-
-        <!-- Categories Section -->
-        <h2 class="section-title">Categories</h2>
-        <div class="categories">
-            <div class="category-card">
-                <img src="images/category1.jpg" alt="Category 1">
-                <p>Category 1</p>
-            </div>
-            <div class="category-card">
-                <img src="images/category2.jpg" alt="Category 2">
-                <p>Category 2</p>
-            </div>
-            <div class="category-card">
-                <img src="images/category3.jpg" alt="Category 3">
-                <p>Category 3</p>
-            </div>
-            <div class="category-card">
-                <img src="images/category4.jpg" alt="Category 4">
-                <p>Category 4</p>
-            </div>
-        </div>
-
-        <!-- Items on Bidding Section -->
-        <h2 class="section-title">Items on Bidding</h2>
-        <div class="bidding-items">
-            <div class="bidding-item">
-                <img src="images/item1.jpg" alt="Item 1">
-                <p>Item 1</p>
-            </div>
-            <div class="bidding-item">
-                <img src="images/item2.jpg" alt="Item 2">
-                <p>Item 2</p>
-            </div>
-            <div class="bidding-item">
-                <img src="images/item3.jpg" alt="Item 3">
-                <p>Item 3</p>
-            </div>
-            <div class="bidding-item">
-                <img src="images/item4.jpg" alt="Item 4">
-                <p>Item 4</p>
-            </div>
-        </div>
+        <?php if ($product['status'] === 'active'): ?>
+            <form method="POST">
+                <label for="bid_amount">Your Bid:</label>
+                <input type="number" step="0.01" name="bid_amount" id="bid_amount" required>
+                <button type="submit">Place Bid</button>
+            </form>
+            <?php if (isset($error)): ?>
+                <p style="color: red;"><?php echo htmlspecialchars($error); ?></p>
+            <?php endif; ?>
+        <?php elseif ($product['status'] === 'pending'): ?>
+            <p>This auction is pending and cannot accept bids at this time.</p>
+        <?php elseif ($product['status'] === 'ended'): ?>
+            <p>This auction has ended.</p>
+        <?php endif; ?>
     </main>
 
     <!-- Footer -->
     <footer id="footer">
         <p>&copy; 2025 BidSecond. All rights reserved.</p>
     </footer>
-
-    <script src="scripts/main.js"></script>
 </body>
 </html>
