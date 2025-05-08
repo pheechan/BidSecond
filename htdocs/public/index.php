@@ -72,102 +72,123 @@ $user = $_SESSION['user']; // Access user information
 
         <!-- Categories Section -->
         
-        <!-- Categories Section -->
         <h2 class="section-title">Categories</h2>
         <div class="categories">
             <div class="category-card">
                 <a href="category.php?category=Electronics">
-                    <img src="images/electronics.jpg" alt="Electronics">
+                    
                     <p>Electronics</p>
                 </a>
             </div>
             <div class="category-card">
                 <a href="category.php?category=Fashion">
-                    <img src="images/fashion.jpg" alt="Fashion">
+                    
                     <p>Fashion</p>
                 </a>
             </div>
             <div class="category-card">
-                <a href="category.php?category=Home%20%26%20Garden">
-                    <img src="images/home_garden.jpg" alt="Home & Garden">
-                    <p>Home & Garden</p>
+                <a href="category.php?category=Home and Garden">
+                    
+                    <p>Home and Garden</p>
                 </a>
             </div>
             <div class="category-card">
-                <a href="category.php?category=Toys%20%26%20Games">
-                    <img src="images/toys_games.jpg" alt="Toys & Games">
-                    <p>Toys & Games</p>
+                <a href="category.php?category=Toys and Games">
+                    
+                    <p>Toys and Games</p>
                 </a>
             </div>
             <div class="category-card">
                 <a href="category.php?category=Automotive">
-                    <img src="images/automotive.jpg" alt="Automotive">
+                    
                     <p>Automotive</p>
                 </a>
             </div>
             <div class="category-card">
-                <a href="category.php?category=Sports%20%26%20Outdoors">
-                    <img src="images/sports_outdoors.jpg" alt="Sports & Outdoors">
-                    <p>Sports & Outdoors</p>
+                <a href="category.php?category=Sports and Outdoors">
+                    
+                    <p>Sports and Outdoors</p>
                 </a>
             </div>
             <div class="category-card">
-                <a href="category.php?category=Books%20%26%20Media">
-                    <img src="images/books_media.jpg" alt="Books & Media">
-                    <p>Books & Media</p>
+                <a href="category.php?category=Books and Media">
+                    
+                    <p>Books and Media</p>
                 </a>
             </div>
             <div class="category-card">
-                <a href="category.php?category=Health%20%26%20Beauty">
-                    <img src="images/health_beauty.jpg" alt="Health & Beauty">
-                    <p>Health & Beauty</p>
+                <a href="category.php?category=Health and Beauty">
+                    
+                    <p>Health and Beauty</p>
                 </a>
             </div>
             <div class="category-card">
-                <a href="category.php?category=Jewelry%20%26%20Watches">
-                    <img src="images/jewelry_watches.jpg" alt="Jewelry & Watches">
-                    <p>Jewelry & Watches</p>
+                <a href="category.php?category=Jewelry and Watches">
+                    
+                    <p>Jewelry and Watches</p>
                 </a>
             </div>
             <div class="category-card">
-                <a href="category.php?category=Music%20%26%20Instruments">
-                    <img src="images/music_instruments.jpg" alt="Music & Instruments">
-                    <p>Music & Instruments</p>
+                <a href="category.php?category=Music and Instruments">
+                    
+                    <p>Music and Instruments</p>
                 </a>
             </div>
             <div class="category-card">
-                <a href="category.php?category=Collectibles%20%26%20Antiques">
-                    <img src="images/collectibles_antiques.jpg" alt="Collectibles & Antiques">
-                    <p>Collectibles & Antiques</p>
+                <a href="category.php?category=Collectibles and Antiques">
+                    
+                    <p>Collectibles and Antiques</p>
                 </a>
             </div>
             <div class="category-card">
-                <a href="category.php?category=Art%20%26%20Craft">
-                    <img src="images/art_craft.jpg" alt="Art & Craft">
-                    <p>Art & Craft</p>
+                <a href="category.php?category=Art and Craft">
+                    
+                    <p>Art and Craft</p>
                 </a>
             </div>
         </div>
 
         <!-- Items on Bidding Section -->
+        <?php
+        // Fetch random active products from the AUCTIONS table
+        $query = "
+            SELECT 
+                auction_id, 
+                title, 
+                image, 
+                start_price, 
+                bid_amount 
+            FROM AUCTIONS 
+            WHERE status = 'active' 
+            ORDER BY RAND() 
+            LIMIT 4
+        ";
+        $stmt = $pdo->prepare($query);
+        $stmt->execute();
+        $randomProducts = $stmt->fetchAll();
+        ?>
+
+        <!-- Items on Bidding Section -->
         <h2 class="section-title">Items on Bidding</h2>
         <div class="bidding-items">
-            <div class="bidding-item">
-                <img src="images/item1.jpg" alt="Item 1">
-                <p>Item 1</p>
-            </div>
-            <div class="bidding-item">
-                <img src="images/item2.jpg" alt="Item 2">
-                <p>Item 2</p>
-            </div>
-            <div class="bidding-item">
-                <img src="images/item3.jpg" alt="Item 3">
-                <p>Item 3</p>
-            </div>
-            <div class="bidding-item">
-                <img src="images/item4.jpg" alt="Item 4">
-                <p>Item 4</p>
-            </div>
+            <?php if (count($randomProducts) > 0): ?>
+                <?php foreach ($randomProducts as $product): ?>
+                    <div class="bidding-item">
+                        <a href="Product.php?auction_id=<?php echo $product['auction_id']; ?>">
+                            <?php if (!empty($product['image'])): ?>
+                                <img src="data:image/jpeg;base64,<?php echo base64_encode($product['image']); ?>" alt="<?php echo htmlspecialchars($product['title']); ?>">
+                            <?php else: ?>
+                                <img src="images/no-image.jpg" alt="No Image Available">
+                            <?php endif; ?>
+                            <p><?php echo htmlspecialchars($product['title']); ?></p>
+                            <p>Start Price: $<?php echo number_format($product['start_price'], 2); ?></p>
+                            <p>Current Bid: $<?php echo number_format($product['bid_amount'], 2); ?></p>
+                        </a>
+                    </div>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <p>No active products available for bidding.</p>
+            <?php endif; ?>
         </div>
     </main>
 

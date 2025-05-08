@@ -40,7 +40,7 @@ $query = "
         bid_amount, 
         end_time 
     FROM AUCTIONS 
-    WHERE category = ? AND status = 'active'
+    WHERE LOWER(category) = LOWER(?) AND status = 'active'
 ";
 $stmt = $pdo->prepare($query);
 $stmt->execute([$category]);
