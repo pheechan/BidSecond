@@ -30,7 +30,12 @@ $stmt->bind_result($balance);
 $stmt->fetch();
 $stmt->close();
 
-// Fetch wallet history
+// Pagination setup
+$limit = 10; // Number of records per page
+$page = isset($_GET['page']) && is_numeric($_GET['page']) ? intval($_GET['page']) : 1;
+$offset = ($page - 1) * $limit;
+
+// Fetch wallet history with pagination
 $order = isset($_GET['order']) && $_GET['order'] === 'asc' ? 'ASC' : 'DESC';
 
 $query = "
@@ -50,17 +55,44 @@ $query = "
     FROM WITHDRAW
     WHERE user_id = ?
     ORDER BY date $order
+    LIMIT ? OFFSET ?
 ";
 
 $stmt = $link->prepare($query);
 if (!$stmt) {
     die("Failed to prepare statement: " . $link->error);
 }
-$stmt->bind_param("iiii", $user['user_id'], $user['user_id'], $user['user_id'], $user['user_id']);
+$stmt->bind_param("iiiiii", $user['user_id'], $user['user_id'], $user['user_id'], $user['user_id'], $limit, $offset);
 $stmt->execute();
 $result = $stmt->get_result();
 $transactions = $result->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
+
+// Count total transactions for pagination
+$count_query = "
+    SELECT COUNT(*) AS total
+    FROM (
+        SELECT topup_date AS date FROM TOPUP WHERE user_id = ?
+        UNION ALL
+        SELECT end_time AS date FROM SELL_HISTORY WHERE user_id = ?
+        UNION ALL
+        SELECT end_time AS date FROM BUY_HISTORY WHERE user_id = ?
+        UNION ALL
+        SELECT withdraw_date AS date FROM WITHDRAW WHERE user_id = ?
+    ) AS combined
+";
+
+$stmt = $link->prepare($count_query);
+if (!$stmt) {
+    die("Failed to prepare statement: " . $link->error);
+}
+$stmt->bind_param("iiii", $user['user_id'], $user['user_id'], $user['user_id'], $user['user_id']);
+$stmt->execute();
+$result = $stmt->get_result();
+$total_transactions = $result->fetch_assoc()['total'];
+$stmt->close();
+
+$total_pages = ceil($total_transactions / $limit);
 
 // Handle Topup Submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['topup_amount'])) {
@@ -178,7 +210,7 @@ $link->close();
         <a href="index.php" class="back-to-home-button">Back to Home</a>
 
         <h1>My Wallet</h1>
-        <p class="balance">Current Balance: $<?php echo number_format($balance, 2); ?></p>
+        <p class="balance">Current Balance: ฿<?php echo number_format($balance, 2); ?></p>
         <?php if (!empty($message)) { ?>
             <p class="message"><?php echo $message; ?></p>
         <?php } ?>
@@ -238,10 +270,10 @@ $link->close();
                             <p class="history-date"><?php echo date("Y-m-d H:i:s", strtotime($transaction['date'])); ?></p>
                             <p class="history-type">
                                 <?php if ($transaction['amount'] > 0) { ?>
-                                    <span class="history-amount positive">+<?php echo number_format($transaction['amount'], 2); ?></span>
+                                    <span class="history-amount positive">+฿<?php echo number_format($transaction['amount'], 2); ?></span>
                                     <span class="history-source">(<?php echo $transaction['type']; ?>)</span>
                                 <?php } else { ?>
-                                    <span class="history-amount negative"><?php echo number_format($transaction['amount'], 2); ?></span>
+                                    <span class="history-amount negative">-฿<?php echo number_format(abs($transaction['amount']), 2); ?></span>
                                     <span class="history-source">(<?php echo $transaction['type']; ?>)</span>
                                 <?php } ?>
                             </p>
@@ -249,6 +281,19 @@ $link->close();
                     <?php } ?>
                 <?php } else { ?>
                     <p>No transactions found.</p>
+                <?php } ?>
+            </div>
+            <div class="pagination">
+                <?php if ($page > 1) { ?>
+                    <a href="wallet.php?page=<?php echo $page - 1; ?>&order=<?php echo $order; ?>" class="pagination-button">Previous</a>
+                <?php } ?>
+                <?php for ($i = 1; $i <= $total_pages; $i++) { ?>
+                    <a href="wallet.php?page=<?php echo $i; ?>&order=<?php echo $order; ?>" class="pagination-button <?php echo $i === $page ? 'active' : ''; ?>">
+                        <?php echo $i; ?>
+                    </a>
+                <?php } ?>
+                <?php if ($page < $total_pages) { ?>
+                    <a href="wallet.php?page=<?php echo $page + 1; ?>&order=<?php echo $order; ?>" class="pagination-button">Next</a>
                 <?php } ?>
             </div>
         </div>
