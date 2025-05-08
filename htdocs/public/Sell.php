@@ -10,12 +10,6 @@ if (!isset($_SESSION['user']['user_id'])) {
     die("User ID is not set in the session. Please log in again.");
 }
 
-// Debugging session data
-echo '<pre>';
-print_r($_SESSION);
-echo '</pre>';
-exit();
-
 $config = include(__DIR__ . '/../private/config.php');
 $user = $_SESSION['user']; // Access user information
 $message = ""; // Message to show after actions
