@@ -294,3 +294,30 @@ body {
     margin-top: 20px;
 }
 
+/* Add these at the very end of your main.css file */
+
+html, body {
+    height: 100%;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+#main-content {
+    flex: 1 0 auto;
+}
+
+#footer {
+    flex-shrink: 0;
+    background-color: #57a05a;
+    color: white;
+    text-align: center;
+    padding: 10px;
+    margin: 0;
+    width: 100%;
+    position: relative;
+}
+
