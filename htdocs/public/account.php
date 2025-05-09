@@ -372,10 +372,8 @@ $link->close();
                 document.querySelector(`.tab[onclick="showTab('${tabId}')"]`).classList.add('active');
 
                 // Adjust margin-top dynamically based on the active tab
-                if (tabId === 'history' || tabId === 'my-listings' || tabId === 'my-bids') {
-                    contentWrapper.style.marginTop = '50px'; // Smaller margin for History, My Listings, and My Bids tabs
-                } else {
-                    contentWrapper.style.marginTop = '250px'; // Larger margin for the Account Information tab
+                if (tabId === 'account-info' || tabId === 'history' || tabId === 'my-listings' || tabId === 'my-bids') {
+                    contentWrapper.style.marginTop = '50px'; // Smaller margin for Account Info, History, My Listings, and My Bids tabs
                 }
 
                 // Hide loading spinner
