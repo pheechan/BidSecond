@@ -29,6 +29,75 @@ try {
     die("Database connection failed: " . $e->getMessage());
 }
 
+// --- PAYMENT PROCESSING ---
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['auction_id'])) {
+    $auction_id = $_POST['auction_id'];
+    $current_time = date('Y-m-d H:i:s');
+
+    // 1. Update PENDING_TRANSACTIONS status to 'paid'
+    $pdo->prepare("
+        UPDATE PENDING_TRANSACTIONS
+        SET payment_status = 'paid'
+        WHERE auction_id = ? AND payment_status = 'unpaid'
+    ")->execute([$auction_id]);
+
+    // 2. Fetch transaction details, including SELLER.user_id and BUYER.user_id
+    $stmt = $pdo->prepare("
+        SELECT pt.*, 
+               s.user_id AS seller_user_id, 
+               b.user_id AS buyer_user_id
+        FROM PENDING_TRANSACTIONS pt
+        JOIN SELLER s ON pt.seller_id = s.seller_id
+        JOIN BUYER b ON pt.buyer_id = b.buyer_id
+        WHERE pt.auction_id = ?
+    ");
+    $stmt->execute([$auction_id]);
+    $txn = $stmt->fetch();
+
+    if ($txn) {
+        // 3. Insert into SELL_HISTORY
+        $pdo->prepare("
+            INSERT INTO SELL_HISTORY (user_id, buyer_id, auction_id, bid_amount, end_time, transaction_at)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ")->execute([
+            $txn['seller_user_id'],
+            $txn['buyer_id'],
+            $txn['auction_id'],
+            $txn['bid_amount'],
+            $txn['end_time'],
+            $current_time
+        ]);
+
+        // 4. Insert into BUY_HISTORY
+        $pdo->prepare("
+            INSERT INTO BUY_HISTORY (user_id, seller_id, auction_id, bid_amount, end_time, transaction_at)
+            VALUES (?, ?, ?, ?, ?, ?)
+        ")->execute([
+            $txn['buyer_user_id'],
+            $txn['seller_id'],
+            $txn['auction_id'],
+            $txn['bid_amount'],
+            $txn['end_time'],
+            $current_time
+        ]);
+
+        // 5. Update balances
+        // Add to seller
+        $pdo->prepare("UPDATE USERS SET balance = balance + ? WHERE user_id = ?")
+            ->execute([$txn['bid_amount'], $txn['seller_user_id']]);
+        // Subtract from buyer
+        $pdo->prepare("UPDATE USERS SET balance = balance - ? WHERE user_id = ?")
+            ->execute([$txn['bid_amount'], $txn['buyer_user_id']]);
+
+        // Optional: Success message
+        header("Location: cart.php?success=1");
+        exit();
+    } else {
+        header("Location: cart.php?error=notfound");
+        exit();
+    }
+}
+
 // Fetch pending items for the logged-in user
 $query = "
     SELECT 
@@ -180,7 +249,7 @@ $pendingItems = $stmt->fetchAll();
                                 <p><strong>Shipping Address:</strong> <?php echo htmlspecialchars($item['address']); ?></p>
                                 <p><strong>End Time:</strong> <?php echo htmlspecialchars($item['end_time']); ?></p>
                                 <p><strong>Status:</strong> <?php echo ucfirst($item['payment_status']); ?></p>
-                                <form action="payment.php" method="POST">
+                                <form action="cart.php" method="POST">
                                     <input type="hidden" name="auction_id" value="<?php echo $item['auction_id']; ?>">
                                     <button type="submit" class="pay-button">Pay Now</button>
                                 </form>
