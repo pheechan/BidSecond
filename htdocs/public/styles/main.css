@@ -70,7 +70,7 @@ body {
 /* Slideshow */
 .slideshow-container {
     position: relative;
-    margin: 0 auto; /* Center the slideshow */
+    margin: 15px auto 0 auto; /* Add top margin */
     width: 70%; /* Increase the width of the slideshow */
     overflow: hidden; /* Prevent overflow issues */
 }
