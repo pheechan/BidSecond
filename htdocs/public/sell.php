@@ -65,6 +65,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_auction'])) {
         $stmt->bind_param("issssdddsss", $seller_id, $title, $image, $category, $description, $starting_price, $bid_amount, $min_increment, $end_time, $status, $created_at);
 
         if ($stmt->execute()) {
+            $auction_id = $link->insert_id; // Get the newly created auction_id
+
+            // Update SELLER table with the auction_id
+            $update_seller_stmt = $link->prepare("UPDATE SELLER SET auction_id = ? WHERE seller_id = ?");
+            if (!$update_seller_stmt) {
+                die("Failed to prepare update statement: " . $link->error);
+            }
+            $update_seller_stmt->bind_param("ii", $auction_id, $seller_id);
+            $update_seller_stmt->execute();
+            $update_seller_stmt->close();
+
             $message = "Auction created successfully!";
         } else {
             $message = "Failed to create auction.";
@@ -322,3 +333,4 @@ $link->close();
     </script>
 </body>
 </html>
+
