@@ -189,22 +189,7 @@ try {
         }
         $randomProducts = $stmt->fetchAll();
         ?>
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-    
-=======
-        
-        
->>>>>>> Stashed changes
-=======
-        
-        
->>>>>>> Stashed changes
-=======
-        
-        
->>>>>>> Stashed changes
+
         <!-- Items on Bidding Section -->
         <h2 class="section-title">Items on Bidding</h2>
         <div class="bidding-items">
