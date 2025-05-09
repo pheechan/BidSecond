@@ -45,6 +45,73 @@ $server_info = [
     'server_time' => date('Y-m-d H:i:s'),
     'timezone' => date_default_timezone_get(),
 ];
+
+// Fetch data for Report and Analytics
+
+// Top 10 Highest Bids
+$top_highest_bids = $pdo->query("
+    SELECT auction_id, MAX(bid_amount) AS highest_bid 
+    FROM BIDS 
+    GROUP BY auction_id 
+    ORDER BY highest_bid DESC 
+    LIMIT 10
+")->fetchAll();
+
+// Top 10 Lowest Bids
+$top_lowest_bids = $pdo->query("
+    SELECT auction_id, MIN(bid_amount) AS lowest_bid 
+    FROM BIDS 
+    GROUP BY auction_id 
+    ORDER BY lowest_bid ASC 
+    LIMIT 10
+")->fetchAll();
+
+// Top 10 Most Bids
+$top_most_bids = $pdo->query("
+    SELECT auction_id, COUNT(bid_id) AS bid_count 
+    FROM BIDS 
+    GROUP BY auction_id 
+    ORDER BY bid_count DESC 
+    LIMIT 10
+")->fetchAll();
+
+// Ranking of Categories by Highest Bid
+$category_ranking = $pdo->query("
+    SELECT 
+        category, 
+        MAX(bid_amount) AS highest_bid 
+    FROM AUCTIONS 
+    GROUP BY category 
+    ORDER BY highest_bid DESC
+")->fetchAll();
+
+// Average Starting Price per Category
+$average_start_price = $pdo->query("
+    SELECT 
+        category, 
+        AVG(start_price) AS avg_start_price 
+    FROM AUCTIONS 
+    GROUP BY category
+")->fetchAll();
+
+// Average Bid Price per Category
+$average_bid_price = $pdo->query("
+    SELECT 
+        a.category, 
+        AVG(b.bid_amount) AS avg_bid_price 
+    FROM BIDS b
+    INNER JOIN AUCTIONS a ON b.auction_id = a.auction_id
+    GROUP BY a.category
+")->fetchAll();
+
+// Total Revenue Generated per Category
+$total_revenue_per_category = $pdo->query("
+    SELECT 
+        category, 
+        SUM(bid_amount) AS total_revenue 
+    FROM AUCTIONS 
+    GROUP BY category
+")->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -53,6 +120,7 @@ $server_info = [
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - BidSecond</title>
     <link rel="stylesheet" href="styles/dashboard.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         html {
             scroll-behavior: smooth;
@@ -210,6 +278,39 @@ $server_info = [
             document.querySelectorAll('.transaction-table').forEach(e=>e.style.display='none');
             document.getElementById(type+'-table').style.display='block';
         }
+    </script>
+    <script>
+        // Pass PHP arrays to JS
+        window.analyticsData = {
+            highestBids: {
+                labels: <?php echo json_encode(array_column($top_highest_bids, 'auction_id')); ?>,
+                data: <?php echo json_encode(array_map('floatval', array_column($top_highest_bids, 'highest_bid'))); ?>
+            },
+            lowestBids: {
+                labels: <?php echo json_encode(array_column($top_lowest_bids, 'auction_id')); ?>,
+                data: <?php echo json_encode(array_map('floatval', array_column($top_lowest_bids, 'lowest_bid'))); ?>
+            },
+            mostBids: {
+                labels: <?php echo json_encode(array_column($top_most_bids, 'auction_id')); ?>,
+                data: <?php echo json_encode(array_map('intval', array_column($top_most_bids, 'bid_count'))); ?>
+            },
+            categoryRanking: {
+                labels: <?php echo json_encode(array_column($category_ranking, 'category')); ?>,
+                data: <?php echo json_encode(array_map('floatval', array_column($category_ranking, 'highest_bid'))); ?>
+            },
+            averageStartPrice: {
+                labels: <?php echo json_encode(array_column($average_start_price, 'category')); ?>,
+                data: <?php echo json_encode(array_map('floatval', array_column($average_start_price, 'avg_start_price'))); ?>
+            },
+            averageBidPrice: {
+                labels: <?php echo json_encode(array_column($average_bid_price, 'category')); ?>,
+                data: <?php echo json_encode(array_map('floatval', array_column($average_bid_price, 'avg_bid_price'))); ?>
+            },
+            totalRevenue: {
+                labels: <?php echo json_encode(array_column($total_revenue_per_category, 'category')); ?>,
+                data: <?php echo json_encode(array_map('floatval', array_column($total_revenue_per_category, 'total_revenue'))); ?>
+            }
+        };
     </script>
 </head>
 <body>
@@ -471,12 +572,22 @@ $server_info = [
                 <!-- Report and Analytics Section -->
                 <section id="report-analytics" class="tab-content">
                     <h2>Report and Analytics</h2>
-                    <h3>Top 10 Highest Bids</h3>
-                    <ul>
-                        <?php foreach ($top_bids as $bid): ?>
-                            <li>Auction ID: <?php echo $bid['auction_id']; ?> - ฿<?php echo number_format($bid['highest_bid'], 2); ?></li>
-                        <?php endforeach; ?>
-                    </ul>
+                    <label for="analytics-dropdown">Select a Report:</label>
+                    <select id="analytics-dropdown" onchange="showGraph(this.value)">
+                        <option value="">-- Select a Report --</option>
+                        <option value="highest-bids">Top 10 Highest Bids</option>
+                        <option value="lowest-bids">Top 10 Lowest Bids</option>
+                        <option value="most-bids">Top 10 Most Bids</option>
+                        <option value="category-ranking">Ranking of Categories by Highest Bid</option>
+                        <option value="average-start-price">Average Starting Price per Category</option>
+                        <option value="average-bid-price">Average Bid Price per Category</option>
+                        <option value="total-revenue">Total Revenue Generated per Category</option>
+                    </select>
+
+                    <!-- Graph Container -->
+                    <div id="graph-container" style="width: 100%; max-width: 800px; margin: 20px auto;">
+                        <canvas id="analytics-graph"></canvas>
+                    </div>
                 </section>
 
                 <!-- Server Information Section -->
@@ -494,5 +605,6 @@ $server_info = [
             </main>
         </div>
     <?php endif; ?>
+    <script src="scripts/analytics-graph.js"></script>
 </body>
 </html>
