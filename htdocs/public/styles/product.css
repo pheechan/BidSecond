@@ -1,0 +1,155 @@
+/* General Styles */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f9f9f9;
+}
+
+#main-content {
+    max-width: 1200px;
+    margin: 50px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    display: flex;
+    gap: 20px;
+}
+
+/* Left Column (Image) */
+.product-image-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-right: 20px;
+}
+
+.product-image-container img {
+    max-width: 100%;
+    max-height: 400px; /* Limit the height */
+    width: auto; /* Maintain aspect ratio */
+    height: auto; /* Maintain aspect ratio */
+    object-fit: cover;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Right Column (Details) */
+.product-details-container {
+    flex: 2;
+    padding-left: 20px;
+    text-align: left; /* Ensure text aligns to the left */
+}
+
+.product-details-container h1 {
+    font-size: 32px;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.product-details-container p {
+    font-size: 16px;
+    color: #555;
+    margin: 10px 0;
+}
+
+.product-details-container p strong {
+    color: #333;
+}
+
+.product-description {
+    margin-top: 20px;
+    font-size: 16px;
+    line-height: 1.6;
+    color: #666;
+    border-top: 1px solid #ddd;
+    padding-top: 20px;
+}
+
+/* Bid Input Section */
+.bid-section {
+    margin-top: 30px;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+.bid-section label {
+    font-size: 16px;
+    color: #333;
+    display: block;
+    margin-bottom: 10px;
+}
+
+.bid-section input[type="number"] {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    margin-bottom: 15px;
+}
+
+.bid-section button {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    color: white;
+    background-color: #57a05a;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.bid-section button:hover {
+    background-color: #45a049;
+}
+
+/* Error and Success Messages */
+.error-message {
+    color: red;
+    font-size: 14px;
+    margin-top: 10px;
+}
+
+.success-message {
+    color: green;
+    font-size: 14px;
+    margin-top: 10px;
+}
+
+/* Seller Message */
+.seller-message {
+    font-size: 16px;
+    color: #d9534f; /* Red color for warning */
+    font-weight: bold;
+    text-align: center;
+    margin: 20px 0;
+    background-color: #f8d7da; /* Light red background */
+    padding: 10px;
+    border: 1px solid #f5c6cb;
+    border-radius: 4px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    #main-content {
+        flex-direction: column;
+        padding: 10px;
+    }
+
+    .product-image-container {
+        border-right: none;
+        padding-right: 0;
+        margin-bottom: 20px;
+    }
+
+    .product-details-container {
+        padding-left: 0;
+    }
+}

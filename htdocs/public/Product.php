@@ -43,6 +43,8 @@ $query = "
         a.end_time, 
         a.created_at, 
         a.status, 
+        a.seller_id, 
+        s.user_id AS seller_user_id, -- Fetch user_id from SELLER table
         u.username AS seller_name 
     FROM AUCTIONS a
     LEFT JOIN SELLER s ON a.seller_id = s.seller_id
@@ -57,6 +59,8 @@ if (!$product) {
     die("Product not found.");
 }
 
+// Check if the logged-in user is the seller
+$is_seller = intval($product['seller_user_id']) === intval($user['user_id']);
 
 // Handle bid submission
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bid_amount'])) {
@@ -64,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bid_amount'])) {
 
     // Check if the bid is valid
     if ($bid_amount < $product['bid_amount'] + $product['min_increment']) {
-        $error = "Your bid must be at least $" . number_format($product['bid_amount'] + $product['min_increment'], 2);
+        $error = "Your bid must be at least ฿" . number_format($product['bid_amount'] + $product['min_increment'], 2);
     } else {
         // Check user's balance
         $balance_query = "SELECT balance FROM USERS WHERE user_id = ?";
@@ -97,7 +101,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bid_amount'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($product['title']); ?> - BidSecond</title>
+    <!-- Include main.css for global styles -->
     <link rel="stylesheet" href="styles/main.css">
+    <!-- Include product.css for product-specific styles -->
+    <link rel="stylesheet" href="styles/product.css">
 </head>
 <body>
     <!-- Header Section -->
@@ -126,39 +133,54 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bid_amount'])) {
 
     <!-- Main Content -->
     <main id="main-content">
-        <h1><?php echo htmlspecialchars($product['title']); ?></h1>
-        <p><strong>Category:</strong> <?php echo htmlspecialchars($product['category']); ?></p>
-        <p><strong>Seller:</strong> <?php echo htmlspecialchars($product['seller_name']); ?></p>
-        <p><strong>Description:</strong> <?php echo nl2br(htmlspecialchars($product['description'])); ?></p>
-        <p><strong>Start Price:</strong> $<?php echo number_format($product['start_price'], 2); ?></p>
-        <p><strong>Current Bid:</strong> $<?php echo number_format($product['bid_amount'], 2); ?></p>
-        <p><strong>Minimum Increment:</strong> $<?php echo number_format($product['min_increment'], 2); ?></p>
-        <p><strong>ราคาเสนอขั้นต่ำ:</strong> $<?php echo number_format($product['bid_amount'] + $product['min_increment'], 2); ?></p>
-        <p><strong>End Time:</strong> <?php echo htmlspecialchars($product['end_time']); ?></p>
-        <p><strong>Created At:</strong> <?php echo htmlspecialchars($product['created_at']); ?></p>
-        <?php if (!empty($product['image'])): ?>
-            <img src="data:image/jpeg;base64,<?php echo base64_encode($product['image']); ?>" alt="Product Image" style="max-width: 100%; height: auto;">
-        <?php else: ?>
-            <p>No image available for this product.</p>
-        <?php endif; ?>
+        <!-- Left Column: Product Image -->
+        <div class="product-image-container">
+            <?php if (!empty($product['image'])): ?>
+                <img src="data:image/jpeg;base64,<?php echo base64_encode($product['image']); ?>" alt="Product Image">
+            <?php else: ?>
+                <p>No image available for this product.</p>
+            <?php endif; ?>
+        </div>
 
-        <?php if ($product['status'] === 'active'): ?>
-            <form method="POST">
-                <label for="bid_amount">Your Bid:</label>
-                <input type="number" step="0.01" name="bid_amount" id="bid_amount" required>
-                <button type="submit">Place Bid</button>
-            </form>
-            <?php if (isset($error)): ?>
-                <p style="color: red;"><?php echo htmlspecialchars($error); ?></p>
+        <!-- Right Column: Product Details -->
+        <div class="product-details-container">
+            <h1><?php echo htmlspecialchars($product['title']); ?></h1>
+            <p><strong>Category:</strong> <?php echo htmlspecialchars($product['category']); ?></p>
+            <p><strong>Seller:</strong> <?php echo htmlspecialchars($product['seller_name']); ?></p>
+            <p><strong>Start Price:</strong> ฿<?php echo number_format($product['start_price'], 2); ?></p>
+            <p><strong>Current Bid:</strong> ฿<?php echo number_format($product['bid_amount'], 2); ?></p>
+            <p><strong>Minimum Increment:</strong> ฿<?php echo number_format($product['min_increment'], 2); ?></p>
+            <p><strong>End Time:</strong> <?php echo htmlspecialchars($product['end_time']); ?></p>
+            <div class="product-description">
+                <p><strong>Description:</strong></p>
+                <p><?php echo nl2br(htmlspecialchars($product['description'])); ?></p>
+            </div>
+
+            <!-- Bid Section -->
+            <?php if ($is_seller): ?>
+                <div class="bid-section">
+                    <p class="seller-message">You are the seller of this listing and cannot place a bid.</p>
+                </div>
+            <?php elseif ($product['status'] === 'active'): ?>
+                <div class="bid-section">
+                    <form method="POST">
+                        <label for="bid_amount">Your Bid:</label>
+                        <input type="number" step="0.01" name="bid_amount" id="bid_amount" required>
+                        <button type="submit">Place Bid</button>
+                    </form>
+                    <?php if (isset($error)): ?>
+                        <p class="error-message"><?php echo htmlspecialchars($error); ?></p>
+                    <?php endif; ?>
+                    <?php if (isset($success)): ?>
+                        <p class="success-message"><?php echo htmlspecialchars($success); ?></p>
+                    <?php endif; ?>
+                </div>
+            <?php elseif ($product['status'] === 'pending'): ?>
+                <p>This auction is pending and cannot accept bids at this time.</p>
+            <?php elseif ($product['status'] === 'ended'): ?>
+                <p>This auction has ended.</p>
             <?php endif; ?>
-            <?php if (isset($success)): ?>
-                <p style="color: green;"><?php echo htmlspecialchars($success); ?></p>
-            <?php endif; ?>
-        <?php elseif ($product['status'] === 'pending'): ?>
-            <p>This auction is pending and cannot accept bids at this time.</p>
-        <?php elseif ($product['status'] === 'ended'): ?>
-            <p>This auction has ended.</p>
-        <?php endif; ?>
+        </div>
     </main>
 
     <!-- Footer -->
