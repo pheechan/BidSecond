@@ -75,10 +75,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_account'])) {
     $stmt->bind_param("sssi", $new_username, $new_address, $new_roles, $user_id);
 
     if ($stmt->execute()) {
-        $message = "Account information updated successfully! Please refresh the page to see changes.";
+        $message = "Account information updated successfully!";
         // Update session data
         $_SESSION['user']['name'] = $new_username;
         $_SESSION['user']['roles'] = $new_roles;
+
+        // Redirect to the same page to refresh the data
+        header("Location: account.php");
+        exit();
     } else {
         $message = "Failed to update account information.";
     }
