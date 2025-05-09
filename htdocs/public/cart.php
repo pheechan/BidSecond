@@ -2,6 +2,7 @@
 
 session_start();
 include_once 'init.php';
+
 // Check if the user is logged in
 if (!isset($_SESSION['user'])) {
     header("Location: login.php");
@@ -31,20 +32,22 @@ try {
 // Fetch pending items for the logged-in user
 $query = "
     SELECT 
+        pt.auction_id,
         a.title AS auction_title,
         pt.seller_id,
         pt.bid_amount,
         pt.buyer_id,
-        pt.address,
+        u.address,
         pt.end_time,
         pt.payment_status,
-        u.username AS seller_name,
+        us.username AS seller_name,
         a.image
     FROM PENDING_TRANSACTIONS pt
-    INNER JOIN BUYER b ON pt.buyer_id = b.buyer_id
     INNER JOIN AUCTIONS a ON pt.auction_id = a.auction_id
     INNER JOIN SELLER s ON pt.seller_id = s.seller_id
-    INNER JOIN USERS u ON s.user_id = u.user_id
+    INNER JOIN USERS us ON s.user_id = us.user_id
+    INNER JOIN BUYER b ON pt.buyer_id = b.buyer_id -- Join with BUYER table
+    INNER JOIN USERS u ON b.user_id = u.user_id -- Get user_id from BUYER table
     WHERE b.user_id = ? AND pt.payment_status = 'unpaid'
 ";
 $stmt = $pdo->prepare($query);
