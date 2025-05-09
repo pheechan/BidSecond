@@ -16,7 +16,7 @@ try {
     // Update auctions where end_time has passed and status is still 'active'
     $query = "
         UPDATE AUCTIONS
-        SET status = 'ended'
+        SET status = 'pending'
         WHERE status = 'active' AND end_time < NOW()
     ";
     $stmt = $pdo->prepare($query);

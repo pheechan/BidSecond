@@ -37,7 +37,8 @@ $query = "
         pt.address,
         pt.end_time,
         pt.payment_status,
-        u.username AS seller_name
+        u.username AS seller_name,
+        a.image
     FROM PENDING_TRANSACTIONS pt
     INNER JOIN BUYER b ON pt.buyer_id = b.buyer_id
     INNER JOIN AUCTIONS a ON pt.auction_id = a.auction_id
@@ -88,11 +89,38 @@ $pendingItems = $stmt->fetchAll();
         }
 
         .cart-item {
-            border: 1px solid #ccc; /* Add a border around the box */
-            border-radius: 10px; /* Rounded corners */
-            padding: 20px; /* Add padding inside the box */
-            background-color: #f9f9f9; /* Light background color */
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
+            display: flex; /* Use flexbox for layout */
+            justify-content: space-between; /* Space between details and image */
+            align-items: center; /* Align items vertically */
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .cart-item-content {
+            display: flex; /* Flex container for details and image */
+            gap: 20px; /* Space between details and image */
+            width: 100%; /* Ensure it takes full width */
+        }
+
+        .cart-item-details {
+            flex: 3; /* Take up more space for details */
+        }
+
+        .cart-item-image {
+            flex: 0; /* Take up less space for the image */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .cart-item-image img {
+            width: 200px; /* Set the image width */
+            height: 200px; /* Set the image height */
+            object-fit: cover; /* Ensure the image fits within the box */
+            border-radius: 5px; /* Optional: rounded corners */
         }
 
         .cart-item-details p {
@@ -140,17 +168,26 @@ $pendingItems = $stmt->fetchAll();
             <div class="cart-items">
                 <?php foreach ($pendingItems as $item): ?>
                     <div class="cart-item">
-                        <div class="cart-item-details">
-                            <p><strong>Title:</strong> <?php echo htmlspecialchars($item['auction_title']); ?></p>
-                            <p><strong>Seller Name:</strong> <?php echo htmlspecialchars($item['seller_name']); ?></p>
-                            <p><strong>Winning Bid:</strong> ฿<?php echo number_format($item['bid_amount'], 2); ?></p>
-                            <p><strong>Shipping Address:</strong> <?php echo htmlspecialchars($item['address']); ?></p>
-                            <p><strong>End Time:</strong> <?php echo htmlspecialchars($item['end_time']); ?></p>
-                            <p><strong>Status:</strong> <?php echo ucfirst($item['payment_status']); ?></p>
-                            <form action="payment.php" method="POST">
-                                <input type="hidden" name="auction_id" value="<?php echo $item['auction_id']; ?>">
-                                <button type="submit" class="pay-button">Pay Now</button>
-                            </form>
+                        <div class="cart-item-content">
+                            <div class="cart-item-details">
+                                <p><strong>Title:</strong> <?php echo htmlspecialchars($item['auction_title']); ?></p>
+                                <p><strong>Seller Name:</strong> <?php echo htmlspecialchars($item['seller_name']); ?></p>
+                                <p><strong>Winning Bid:</strong> ฿<?php echo number_format($item['bid_amount'], 2); ?></p>
+                                <p><strong>Shipping Address:</strong> <?php echo htmlspecialchars($item['address']); ?></p>
+                                <p><strong>End Time:</strong> <?php echo htmlspecialchars($item['end_time']); ?></p>
+                                <p><strong>Status:</strong> <?php echo ucfirst($item['payment_status']); ?></p>
+                                <form action="payment.php" method="POST">
+                                    <input type="hidden" name="auction_id" value="<?php echo $item['auction_id']; ?>">
+                                    <button type="submit" class="pay-button">Pay Now</button>
+                                </form>
+                            </div>
+                            <div class="cart-item-image">
+                                <?php if (!empty($item['image'])): ?>
+                                    <img src="data:image/jpeg;base64,<?php echo base64_encode($item['image']); ?>" alt="Item Image">
+                                <?php else: ?>
+                                    <p>No Image</p>
+                                <?php endif; ?>
+                            </div>
                         </div>
                     </div>
                 <?php endforeach; ?>
