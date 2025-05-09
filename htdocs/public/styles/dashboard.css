@@ -6,7 +6,7 @@ html {
 body {
     margin: 0;
     font-family: Arial, sans-serif;
-    background-color: #cccccc;
+    background-color: #e8e8e8;
 }
 
 /* Welcome Screen */
@@ -79,6 +79,39 @@ body {
     background-color: #45a049; /* Highlight on hover */
 }
 
+.sidebar-menu button {
+    background: linear-gradient(90deg, #57a05a, #45a049);
+    border: none;
+    color: white;
+    text-align: left;
+    padding: 12px 20px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 100%;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.sidebar-menu button:hover {
+    background: linear-gradient(90deg, #45a049, #57a05a);
+    transform: translateY(-3px);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.sidebar-menu button:focus {
+    outline: none;
+    background: linear-gradient(90deg, #3a8c3a, #45a049);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+.sidebar-menu button.active {
+    background: linear-gradient(90deg, #3a8c3a, #45a049);
+    font-weight: bold;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
 .back-to-home-button, .logout-button {
     margin-top: 20px;
     padding: 10px 15px;
@@ -98,7 +131,7 @@ body {
 .main-content {
     margin-left: 270px; /* Add margin to prevent overlap with the fixed sidebar */
     padding: 20px;
-    background-color: #e8e8e8;
+    background-color: white; /* Main content background color */
 }
 
 .main-content h2 {

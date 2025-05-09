@@ -35,6 +35,8 @@ $topups = $pdo->query("SELECT * FROM TOPUP")->fetchAll();
 $withdraws = $pdo->query("SELECT * FROM WITHDRAW")->fetchAll();
 $pending_transactions = $pdo->query("SELECT * FROM PENDING_TRANSACTIONS")->fetchAll();
 $top_bids = $pdo->query("SELECT auction_id, MAX(bid_amount) AS highest_bid FROM BIDS GROUP BY auction_id ORDER BY highest_bid DESC LIMIT 10")->fetchAll();
+$buy_history = $pdo->query("SELECT user_id, bid_amount, end_time FROM BUY_HISTORY")->fetchAll();
+$sell_history = $pdo->query("SELECT user_id, bid_amount, end_time FROM SELL_HISTORY")->fetchAll();
 $server_info = [
     'os' => php_uname(),
     'php_version' => phpversion(),
@@ -114,7 +116,101 @@ $server_info = [
             background-color: #57a05a;
             color: white;
         }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
     </style>
+    <script>
+        function showTab(tabId) {
+            // Hide all tab content
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.style.display = 'none');
+
+            // Show the selected tab
+            const selectedTab = document.getElementById(tabId);
+            if (selectedTab) {
+                selectedTab.style.display = 'block';
+            }
+
+            // Update active button in the sidebar
+            const buttons = document.querySelectorAll('.sidebar-menu button');
+            buttons.forEach(button => button.classList.remove('active'));
+            const activeButton = document.querySelector(`.sidebar-menu button[onclick="showTab('${tabId}')"]`);
+            if (activeButton) {
+                activeButton.classList.add('active');
+            }
+        }
+
+        // Automatically show the correct tab based on the URL parameter
+        window.onload = function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            const tab = urlParams.get('tab') || 'summary'; // Default to 'summary' if no tab is specified
+            showTab(tab);
+        };
+
+        function updateRole(select) {
+            const userId = select.dataset.userId;
+            const role = select.value;
+            fetch('api_user_action.php', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                body: `action=update_role&user_id=${userId}&role=${role}`
+            }).then(r=>r.text()).then(alert);
+        }
+
+        function deleteUser(userId) {
+            if(confirm('Delete this user?')) {
+                fetch('api_user_action.php', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    body: `action=delete_user&user_id=${userId}`
+                }).then(()=>location.reload());
+            }
+        }
+
+        function resetPassword(userId) {
+            if(confirm('Reset password for this user?')) {
+                fetch('api_user_action.php', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    body: `action=reset_password&user_id=${userId}`
+                }).then(r=>r.text()).then(alert);
+            }
+        }
+
+        function deleteAuction(auctionId) {
+            if(confirm('Delete this auction?')) {
+                fetch('api_auction_action.php', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    body: `action=delete_auction&auction_id=${auctionId}`
+                }).then(()=>location.reload());
+            }
+        }
+
+        function removeImage(auctionId) {
+            if(confirm('Remove image for this auction?')) {
+                fetch('api_auction_action.php', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    body: `action=remove_image&auction_id=${auctionId}`
+                }).then(()=>location.reload());
+            }
+        }
+
+        function editAuction(auctionId) {
+            window.open('edit_auction.php?auction_id=' + auctionId, '_blank', 'width=600,height=600');
+        }
+
+        // Transaction tab switch
+        function showTransactionTable(type) {
+            document.querySelectorAll('.transaction-table').forEach(e=>e.style.display='none');
+            document.getElementById(type+'-table').style.display='block';
+        }
+    </script>
 </head>
 <body>
     <!-- Welcome Screen -->
@@ -134,12 +230,12 @@ $server_info = [
                     <p><?php echo htmlspecialchars($user['email']); ?></p>
                 </div>
                 <nav class="sidebar-menu">
-                    <a href="#summary">Summary</a>
-                    <a href="#user-management">User Management</a>
-                    <a href="#auction-management">Auction Management</a>
-                    <a href="#transactions">Transactions</a>
-                    <a href="#report-analytics">Report and Analytics</a>
-                    <a href="#server-info">Server Information</a>
+                    <button onclick="showTab('summary'); window.history.pushState({}, '', '?tab=summary');">Summary</button>
+                    <button onclick="showTab('user-management'); window.history.pushState({}, '', '?tab=user-management');">User Management</button>
+                    <button onclick="showTab('auction-management'); window.history.pushState({}, '', '?tab=auction-management');">Auction Management</button>
+                    <button onclick="showTab('transactions'); window.history.pushState({}, '', '?tab=transactions');">Transactions</button>
+                    <button onclick="showTab('report-analytics'); window.history.pushState({}, '', '?tab=report-analytics');">Report and Analytics</button>
+                    <button onclick="showTab('server-info'); window.history.pushState({}, '', '?tab=server-info');">Server Information</button>
                     <a href="index.php" class="back-to-home-button">Back to Home</a>
                     <a href="logout.php" class="logout-button">Logout</a>
                 </nav>
@@ -148,7 +244,7 @@ $server_info = [
             <!-- Main Content -->
             <main class="main-content">
                 <!-- Summary Section -->
-                <section id="summary">
+                <section id="summary" class="tab-content active">
                     <h2>Summary</h2>
                     <div class="summary-container">
                         <div class="summary-card">
@@ -175,7 +271,7 @@ $server_info = [
                 </section>
 
                 <!-- User Management Section -->
-                <section id="user-management">
+                <section id="user-management" class="tab-content">
                     <h2>User Management</h2>
                     <table class="styled-table">
                         <thead>
@@ -205,15 +301,12 @@ $server_info = [
                                     <td><?php echo $user['email_verified'] ? 'Yes' : 'No'; ?></td>
                                     <td>฿<?php echo number_format($user['balance'], 2); ?></td>
                                     <td>
-                                        <select class="role-dropdown" data-user-id="<?php echo $user['user_id']; ?>">
+                                        <select class="role-dropdown" data-user-id="<?php echo $user['user_id']; ?>" onchange="updateRole(this)">
                                             <option value="admin" <?php echo $user['roles'] === 'admin' ? 'selected' : ''; ?>>Admin</option>
                                             <option value="user" <?php echo $user['roles'] === 'user' ? 'selected' : ''; ?>>User</option>
                                         </select>
-                                    </td>
-                                    <td><?php echo $user['created_at']; ?></td>
-                                    <td>
-                                        <button class="delete-user" data-user-id="<?php echo $user['user_id']; ?>">Delete</button>
-                                        <button class="reset-password" data-user-id="<?php echo $user['user_id']; ?>">Reset Password</button>
+                                        <button onclick="deleteUser(<?php echo $user['user_id']; ?>)">Delete</button>
+                                        <button onclick="resetPassword(<?php echo $user['user_id']; ?>)">Reset Password</button>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -221,13 +314,13 @@ $server_info = [
                     </table>
                     <div class="pagination">
                         <?php for ($i = 1; $i <= $total_pages; $i++): ?>
-                            <a href="?connect=true&user_page=<?php echo $i; ?>" class="<?php echo $i === $current_page ? 'active' : ''; ?>"><?php echo $i; ?></a>
+                            <a href="?connect=true&tab=user-management&user_page=<?php echo $i; ?>" class="<?php echo $i === $current_page ? 'active' : ''; ?>"><?php echo $i; ?></a>
                         <?php endfor; ?>
                     </div>
                 </section>
 
                 <!-- Auction Management Section -->
-                <section id="auction-management">
+                <section id="auction-management" class="tab-content">
                     <h2>Auction Management</h2>
                     <table class="styled-table">
                         <thead>
@@ -261,9 +354,9 @@ $server_info = [
                                     <td><?php echo $auction['end_time']; ?></td>
                                     <td><?php echo $auction['created_at']; ?></td>
                                     <td>
-                                        <button class="delete-auction" data-auction-id="<?php echo $auction['auction_id']; ?>">Delete</button>
-                                        <button class="edit-auction" data-auction-id="<?php echo $auction['auction_id']; ?>">Edit</button>
-                                        <button class="remove-image" data-auction-id="<?php echo $auction['auction_id']; ?>">Remove Image</button>
+                                        <button class="delete-auction" data-auction-id="<?php echo $auction['auction_id']; ?>" onclick="deleteAuction(<?php echo $auction['auction_id']; ?>)">Delete</button>
+                                        <button class="edit-auction" data-auction-id="<?php echo $auction['auction_id']; ?>" onclick="editAuction(<?php echo $auction['auction_id']; ?>)">Edit</button>
+                                        <button class="remove-image" data-auction-id="<?php echo $auction['auction_id']; ?>" onclick="removeImage(<?php echo $auction['auction_id']; ?>)">Remove Image</button>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -271,24 +364,112 @@ $server_info = [
                     </table>
                     <div class="pagination">
                         <?php for ($i = 1; $i <= $total_pages; $i++): ?>
-                            <a href="?connect=true&auction_page=<?php echo $i; ?>" class="<?php echo $i === $current_page ? 'active' : ''; ?>"><?php echo $i; ?></a>
+                            <a href="?connect=true&tab=auction-management&auction_page=<?php echo $i; ?>" class="<?php echo $i === $current_page ? 'active' : ''; ?>"><?php echo $i; ?></a>
                         <?php endfor; ?>
                     </div>
                 </section>
 
                 <!-- Transactions Section -->
-                <section id="transactions">
+                <section id="transactions" class="tab-content">
                     <h2>Transactions</h2>
+                    <label for="transaction-type">Select Transaction Type:</label>
+                    <select id="transaction-type" onchange="showTransactionTable(this.value)">
+                        <option value="topups">Top-Ups</option>
+                        <option value="withdraws">Withdraw</option>
+                        <option value="spend">Spend</option>
+                        <option value="income">Income</option>
+                    </select>
+
+                    <div id="topups-table" class="transaction-table">
+                        <!-- Top-Ups Table Here -->
+                    </div>
+                    <div id="withdraws-table" class="transaction-table" style="display:none">
+                        <!-- Withdraw Table Here -->
+                    </div>
+                    <div id="spend-table" class="transaction-table" style="display:none">
+                        <h3>Spend (BUY_HISTORY)</h3>
+                        <table class="styled-table">
+                            <thead>
+                                <tr>
+                                    <th>User ID</th>
+                                    <th>Bid Amount</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($buy_history as $row): ?>
+                                <tr>
+                                    <td><?php echo htmlspecialchars($row['user_id']); ?></td>
+                                    <td>฿<?php echo number_format($row['bid_amount'], 2); ?></td>
+                                    <td><?php echo $row['end_time']; ?></td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="income-table" class="transaction-table" style="display:none">
+                        <h3>Income (SELL_HISTORY)</h3>
+                        <table class="styled-table">
+                            <thead>
+                                <tr>
+                                    <th>User ID</th>
+                                    <th>Bid Amount</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($sell_history as $row): ?>
+                                <tr>
+                                    <td><?php echo htmlspecialchars($row['user_id']); ?></td>
+                                    <td>฿<?php echo number_format($row['bid_amount'], 2); ?></td>
+                                    <td><?php echo $row['end_time']; ?></td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Top-Up Table -->
                     <h3>Top-Ups</h3>
-                    <ul>
-                        <?php foreach ($topups as $topup): ?>
-                            <li><?php echo htmlspecialchars($topup['user_id']); ?> - ฿<?php echo number_format($topup['topup_amount'], 2); ?></li>
-                        <?php endforeach; ?>
-                    </ul>
+                    <table class="styled-table">
+                        <thead>
+                            <tr>
+                                <th>User ID</th>
+                                <th>Top-Up Amount</th>
+                                <th>Status</th>
+                                <th>Top-Up Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            $topups_per_page = 10;
+                            $total_topups = count($topups);
+                            $total_pages = ceil($total_topups / $topups_per_page);
+                            $current_page = isset($_GET['topup_page']) ? (int)$_GET['topup_page'] : 1;
+                            $start_index = ($current_page - 1) * $topups_per_page;
+                            $paginated_topups = array_slice($topups, $start_index, $topups_per_page);
+
+                            foreach ($paginated_topups as $topup): ?>
+                                <tr>
+                                    <td><?php echo htmlspecialchars($topup['user_id']); ?></td>
+                                    <td>฿<?php echo number_format($topup['topup_amount'], 2); ?></td>
+                                    <td><?php echo $topup['status'] ? 'Approved' : 'Pending'; ?></td>
+                                    <td><?php echo $topup['topup_date']; ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+
+                    <!-- Pagination for Top-Ups -->
+                    <div class="pagination">
+                        <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                            <a href="?connect=true&tab=transactions&topup_page=<?php echo $i; ?>" class="<?php echo $i === $current_page ? 'active' : ''; ?>"><?php echo $i; ?></a>
+                        <?php endfor; ?>
+                    </div>
                 </section>
 
                 <!-- Report and Analytics Section -->
-                <section id="report-analytics">
+                <section id="report-analytics" class="tab-content">
                     <h2>Report and Analytics</h2>
                     <h3>Top 10 Highest Bids</h3>
                     <ul>
@@ -299,7 +480,7 @@ $server_info = [
                 </section>
 
                 <!-- Server Information Section -->
-                <section id="server-info">
+                <section id="server-info" class="tab-content">
                     <h2>Server Information</h2>
                     <ul>
                         <li>OS: <?php echo $server_info['os']; ?></li>
