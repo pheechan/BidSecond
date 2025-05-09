@@ -146,17 +146,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bid_amount'])) {
                 </a>
             </div>
             <div class="search-bar">
-                <input type="text" placeholder="Search for items...">
-                <button type="submit">Search</button>
+                <!-- Search Bar -->
+                <form id="searchForm" class="search-bar" action="search.php" method="get">
+                    <input type="text" id="searchInput" name="q" placeholder="Search for items..." required>
+                    <button type="submit">Search</button>
+                </form>
             </div>
             <nav class="nav-links">
-                <a href="Sell.php">Sell</a>
-                <a href="#">Balance</a>
-                <?php if ($user['role'] === 'admin') { ?> <!-- Show Dashboard only for admin -->
-                    <a href="#">Dashboard</a>
+                <a href="sell.php">Sell</a>
+                <a href="wallet.php">Balance</a>
+                <?php if ($user['roles'] === 'admin') { ?> <!-- Show Dashboard only for admin -->
+                    <a href="dashboard.php">Dashboard</a>
                 <?php } ?>
                 <a href="account.php">Account</a> <!-- Link to account.php -->
-                <a href="#">Cart</a>
+                <a href="cart.php">Cart</a>
             </nav>
         </div>
     </header>

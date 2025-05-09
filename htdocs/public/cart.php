@@ -227,9 +227,13 @@ $pendingItems = $stmt->fetchAll();
                 </a>
             </div>
             <nav class="nav-links">
-                <a href="index.php">Home</a>
-                <a href="account.php">Account</a>
+                <a href="sell.php">Sell</a>
                 <a href="wallet.php">Balance</a>
+                <?php if ($user['roles'] === 'admin') { ?> <!-- Show Dashboard only for admin -->
+                    <a href="dashboard.php">Dashboard</a>
+                <?php } ?>
+                <a href="account.php">Account</a> <!-- Link to account.php -->
+                <a href="cart.php">Cart</a>
             </nav>
         </div>
     </header>
