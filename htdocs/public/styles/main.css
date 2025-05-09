@@ -70,9 +70,9 @@ body {
 /* Slideshow */
 .slideshow-container {
     position: relative;
-    margin: 0 auto; /* Center the slideshow horizontally */
-    width: 50%; /* Adjust the width as needed */
-    overflow: hidden; /* Prevent flickering caused by overflow */
+    margin: 0 auto; /* Center the slideshow */
+    width: 70%; /* Increase the width of the slideshow */
+    overflow: hidden; /* Prevent overflow issues */
 }
 
 .mySlides {
@@ -83,6 +83,7 @@ body {
 .mySlides img {
     width: 100%; /* Make the images responsive */
     height: auto; /* Maintain aspect ratio */
+    border-radius: 10px; /* Optional: Add rounded corners */
 }
 
 .fade {
@@ -118,22 +119,59 @@ body {
 .hot-bids {
     display: flex;
     align-items: center;
-    margin: 20px 0;
+    justify-content: center;
+    margin: 20px auto; /* Center the section and add spacing */
+    width: 80%; /* Adjust the width as needed */
+    position: relative; /* For positioning arrows */
 }
 
 .hot-bids-container {
     display: flex;
-    overflow-x: auto;
-    gap: 10px;
+    overflow-x: auto; /* Allow horizontal scrolling */
+    gap: 10px; /* Add spacing between bid items */
+    padding: 10px;
+    scroll-behavior: smooth; /* Smooth scrolling for arrows */
 }
 
 .bid-item {
+    flex: 0 0 auto; /* Prevent shrinking */
+    padding: 15px;
     background-color: #f9f9f9;
-    padding: 20px;
-    border: 1px solid #ccc;
+    border: 1px solid #ddd;
     border-radius: 5px;
-    min-width: 200px;
     text-align: center;
+    min-width: 150px; /* Adjust the size of bid items */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.arrow {
+    background-color: #57a05a;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+    height: 40px;
+    width: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 1;
+}
+
+.left-arrow {
+    left: -50px; /* Adjust position of the left arrow */
+}
+
+.right-arrow {
+    right: -50px; /* Adjust position of the right arrow */
+}
+
+.arrow:hover {
+    background-color: #45a049;
 }
 
 /* Categories */
@@ -184,7 +222,6 @@ body {
     padding: 10px;
     margin: 0;
 }
-
 
 .no-products-message {
     text-align: center;

@@ -35,8 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_auction'])) {
     // Handle image upload
     $image = null;
     if (isset($_FILES['picture']) && $_FILES['picture']['error'] === UPLOAD_ERR_OK) {
-        $image = 'uploads/' . basename($_FILES['picture']['name']);
-        move_uploaded_file($_FILES['picture']['tmp_name'], __DIR__ . '/../' . $image);
+        $image = file_get_contents($_FILES['picture']['tmp_name']); // Read the file's binary content
     }
 
     if ($title && $category && $description && $starting_price > 0 && $min_increment > 0 && $end_time && $image) {
@@ -66,16 +65,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create_auction'])) {
         $stmt->bind_param("issssdddsss", $seller_id, $title, $image, $category, $description, $starting_price, $bid_amount, $min_increment, $end_time, $status, $created_at);
 
         if ($stmt->execute()) {
-            // Update SELLER table with the auction_id
-            $auction_id = $link->insert_id; // Get the newly created auction_id
-            $update_seller_stmt = $link->prepare("UPDATE SELLER SET auction_id = ? WHERE seller_id = ?");
-            if (!$update_seller_stmt) {
-                die("Failed to prepare update statement: " . $link->error);
-            }
-            $update_seller_stmt->bind_param("ii", $auction_id, $seller_id);
-            $update_seller_stmt->execute();
-            $update_seller_stmt->close();
-
             $message = "Auction created successfully!";
         } else {
             $message = "Failed to create auction.";
@@ -225,7 +214,7 @@ $link->close();
 
             <form action="sell.php" method="POST" enctype="multipart/form-data">
                 <div class="form-group">
-                    <label for="title">Auction Title NEGUS</label>
+                    <label for="title">Auction Title</label>
                     <div class="form-group-box">
                         <input type="text" id="title" name="title" placeholder="Enter auction title" required>
                     </div>

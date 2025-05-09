@@ -53,7 +53,7 @@ try {
                     <a href="#">Dashboard</a>
                 <?php } ?>
                 <a href="account.php">Account</a> <!-- Link to account.php -->
-                <a href="#">Cart</a>
+                <a href="cart.php">Cart</a>
             </nav>
         </div>
     </header>
@@ -269,6 +269,16 @@ try {
         // Initialize the slideshow and dots
         setupDots();
         showSlides();
+    </script>
+    <script>
+        function scrollHotBids(direction) {
+            const container = document.querySelector(".hot-bids-container");
+            const scrollAmount = 300; // Adjust the scroll amount as needed
+            container.scrollBy({
+                left: direction * scrollAmount,
+                behavior: "smooth",
+            });
+        }
     </script>
 </body>
 </html>
