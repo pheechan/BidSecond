@@ -53,7 +53,8 @@ $products = $stmt->fetchAll();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($category); ?> - BidSecond</title>
-    <link rel="stylesheet" href="styles/main.css">
+    
+    <link rel="stylesheet" href="styles/category.css?v=<?php echo time(); ?>"> <!-- Link to category-specific CSS -->
 </head>
 <body>
     <!-- Header Section -->
