@@ -1,0 +1,113 @@
+/* General Styles */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #cccccc;
+}
+
+/* Welcome Screen */
+.welcome-screen {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #57a05a;
+    color: white;
+    text-align: center;
+}
+
+.welcome-screen h1 {
+    font-size: 36px;
+    margin-bottom: 20px;
+}
+
+.connect-button {
+    padding: 10px 20px;
+    font-size: 18px;
+    background-color: white;
+    color: #57a05a;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.connect-button:hover {
+    background-color: #45a049;
+}
+
+/* Dashboard Layout */
+.dashboard-container {
+    display: flex;
+    height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 250px;
+    background-color: #57a05a;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+}
+
+.sidebar-header {
+    margin-bottom: 20px;
+}
+
+.sidebar-header p {
+    margin: 5px 0;
+}
+
+.sidebar-menu a {
+    color: white;
+    text-decoration: none;
+    padding: 10px 0;
+    display: block;
+    transition: background-color 0.3s ease;
+}
+
+.sidebar-menu a:hover {
+    background-color: #45a049;
+}
+
+.back-to-home-button, .logout-button {
+    margin-top: 20px;
+    padding: 10px 15px;
+    background-color: #ff4d4d;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.back-to-home-button:hover, .logout-button:hover {
+    background-color: white;
+    color: #ff4d4d;
+}
+
+/* Main Content */
+.main-content {
+    flex: 1;
+    padding: 20px;
+    background-color: #cccccc;
+}
+
+.main-content h2 {
+    color: #57a05a;
+    margin-bottom: 20px;
+}
+
+.summary-box {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.summary-box p, .summary-box ul {
+    margin: 10px 0;
+    color: #57a05a;
+}
