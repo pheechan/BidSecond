@@ -47,3 +47,14 @@
     font-size: 1.2em;
     width: 100%;
 }
+
+/* Filter button hover */
+#filterBtn:hover svg {
+    fill: #388e3c;
+}
+#filterDropdown label {
+    cursor: pointer;
+}
+#filterDropdown input[type="radio"] {
+    accent-color: #57a05a;
+}

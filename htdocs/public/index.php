@@ -68,9 +68,35 @@ $hotBids = $hotBidsStmt->fetchAll();
             </div>
             <div class="search-bar">
                 <!-- Search Bar -->
-                <form id="searchForm" class="search-bar" action="search.php" method="get">
-                    <input type="text" id="searchInput" name="q" placeholder="Search for items..." required>
+                <form id="searchForm" class="search-bar" action="search.php" method="get" style="position:relative;">
+                    <input type="text" id="searchInput" name="q" placeholder="Search for items..." value="<?php echo isset($q) ? htmlspecialchars($q) : ''; ?>" required>
                     <button type="submit">Search</button>
+                    <button type="button" id="filterBtn" style="background: #fff; border: 1px solid #ccc; border-left: none; border-radius: 0 5px 5px 0; padding: 0 12px; cursor:pointer; display:flex; align-items:center;">
+                        <!-- SVG filter icon -->
+                        <svg width="20" height="20" fill="#57a05a" viewBox="0 0 24 24"><path d="M3 5h18v2H3zm4 7h10v2H7zm2 7h6v2H9z"/></svg>
+                    </button>
+                    <div id="filterDropdown" style="display:none; position:absolute; top:110%; right:0; background:#fff; border:1px solid #ccc; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.08); padding:15px; z-index:10; min-width:200px;">
+                        <div style="font-weight:bold; margin-bottom:8px;">Category</div>
+                        <?php
+                        // List of categories (should match your site)
+                        $categories = [
+                            "Electronics", "Fashion", "Home and Garden", "Toys and Games", "Automotive",
+                            "Sports and Outdoors", "Books and Media", "Health and Beauty", "Jewelry and Watches",
+                            "Music and Instruments", "Collectibles and Antiques", "Art and Craft"
+                        ];
+                        $selectedCategory = isset($_GET['category']) ? $_GET['category'] : '';
+                        foreach ($categories as $cat): ?>
+                            <div>
+                                <label>
+                                    <input type="radio" name="category" value="<?php echo htmlspecialchars($cat); ?>" <?php if ($selectedCategory === $cat) echo 'checked'; ?>>
+                                    <?php echo htmlspecialchars($cat); ?>
+                                </label>
+                            </div>
+                        <?php endforeach; ?>
+                        <div style="margin-top:8px;">
+                            <button type="button" id="closeFilter" style="background:#57a05a; color:#fff; border:none; border-radius:4px; padding:4px 12px; cursor:pointer;">OK</button>
+                        </div>
+                    </div>
                 </form>
             </div>
             <nav class="nav-links">
@@ -341,6 +367,24 @@ $hotBids = $hotBidsStmt->fetchAll();
         // Initialize the slideshow and dots
         setupDots();
         showSlides();
+
+        document.getElementById('filterBtn').onclick = function(e) {
+            e.preventDefault();
+            var dropdown = document.getElementById('filterDropdown');
+            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+        };
+        // Hide dropdown when OK is clicked
+        document.getElementById('closeFilter').onclick = function() {
+            document.getElementById('filterDropdown').style.display = 'none';
+        };
+        // Optional: Hide dropdown if click outside
+        document.addEventListener('click', function(e) {
+            var filterBtn = document.getElementById('filterBtn');
+            var dropdown = document.getElementById('filterDropdown');
+            if (!filterBtn.contains(e.target) && !dropdown.contains(e.target)) {
+                dropdown.style.display = 'none';
+            }
+        });
     </script>
 </body>
 </html>
