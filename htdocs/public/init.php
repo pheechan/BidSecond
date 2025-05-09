@@ -28,15 +28,18 @@ try {
     die("Database connection failed: " . $e->getMessage());
 }
 
-// Lazy update mechanism for auctions
+$current_time = date('Y-m-d H:i:s'); // Current Thai time
+
+// Compare $current_time with end_time and update status to 'pending'
 $query = "
     UPDATE AUCTIONS
     SET status = 'pending'
-    WHERE status = 'active' AND end_time < NOW()
+    WHERE status = 'active' AND CAST(end_time AS DATETIME) < :current_time
 ";
 $stmt = $pdo->prepare($query);
-$stmt->execute();
+$stmt->execute([':current_time' => $current_time]);
 
+// Optional: Insert into PENDING_TRANSACTIONS if needed
 $insert_query = "
     INSERT INTO PENDING_TRANSACTIONS (auction_id, seller_id, bid_amount, end_time, payment_status)
     SELECT auction_id, seller_id, bid_amount, end_time, 'unpaid'
