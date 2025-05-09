@@ -8,8 +8,9 @@ body {
 
 .content-wrapper {
     padding: 20px; /* Add padding around the content */
-    margin-top: 0; /* Remove static margin */
+    margin-top: 20px; /* Add margin to create space at the top */
     transition: margin-top 0.3s ease; /* Smooth transition for margin changes */
+    display: block; /* Ensure it is not a flex container */
 }
 
 /* Content Box */
@@ -190,4 +191,148 @@ body {
 
 .pagination-button:hover {
     background-color: #45a049;
+}
+
+/* Listings Container */
+.listings-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.listing-card {
+    width: 300px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    text-align: center;
+    transition: transform 0.3s ease;
+}
+
+.listing-card:hover {
+    transform: scale(1.05);
+}
+
+.listing-image {
+    width: 100%; /* Ensure the image fits the card width */
+    max-width: 300px; /* Limit the maximum width */
+    height: auto; /* Maintain aspect ratio */
+    max-height: 200px; /* Limit the maximum height */
+    object-fit: cover; /* Ensure the image fits within the dimensions */
+    border-bottom: 1px solid #ddd; /* Optional: Add a border below the image */
+}
+
+.listing-details {
+    padding: 15px;
+}
+
+.listing-details h3 {
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.listing-details p {
+    font-size: 14px;
+    margin: 5px 0;
+}
+
+.view-details-button {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 8px 12px;
+    background-color: #57a05a;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.view-details-button:hover {
+    background-color: #45a049;
+}
+
+/* Bids Container */
+.bids-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.bid-card {
+    width: 300px;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    text-align: center;
+    transition: transform 0.3s ease;
+}
+
+.bid-card:hover {
+    transform: scale(1.05);
+}
+
+.bid-card.highest-bid {
+    background-color: #57a05a; /* Green for highest bid */
+    color: white; /* White text for visibility */
+}
+
+.bid-card.surpassed-bid {
+    background-color: #cccccc; /* Gray for surpassed bid */
+    color: black; /* Black text for visibility */
+}
+
+.bid-image {
+    width: 100%;
+    max-width: 300px;
+    height: auto;
+    max-height: 200px;
+    object-fit: cover;
+    border-bottom: 1px solid #ddd;
+}
+
+.bid-details {
+    padding: 15px;
+}
+
+.bid-details h3 {
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.bid-details p {
+    font-size: 14px;
+    margin: 5px 0;
+}
+
+.bid-status {
+    font-weight: bold;
+    margin-top: 10px;
+}
+
+.view-details-button {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 8px 12px;
+    background-color: white;
+    color: #57a05a;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: bold;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.view-details-button:hover {
+    background-color: #45a049;
+    color: white;
 }

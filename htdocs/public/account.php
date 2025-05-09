@@ -62,6 +62,51 @@ $stmt->execute();
 $sell_history = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
 
+// Fetch My Listings
+$stmt = $link->prepare("
+    SELECT a.auction_id, a.title, a.start_price, a.bid_amount, a.end_time, a.image, a.created_at, a.status
+    FROM AUCTIONS a
+    INNER JOIN SELLER s ON a.seller_id = s.seller_id
+    WHERE s.user_id = ?
+    ORDER BY a.created_at DESC
+");
+if (!$stmt) {
+    die("Failed to prepare statement: " . $link->error);
+}
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$my_listings = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+$stmt->close();
+
+// Fetch My Bids
+$stmt = $link->prepare("
+    SELECT 
+        a.auction_id, 
+        a.title, 
+        a.start_price, 
+        a.bid_amount AS highest_bid, 
+        a.end_time, 
+        a.image, 
+        MAX(b.bid_amount) AS user_bid, 
+        CASE 
+            WHEN a.bid_amount = MAX(b.bid_amount) THEN 'highest'
+            ELSE 'surpassed'
+        END AS bid_status
+    FROM BIDS b
+    INNER JOIN AUCTIONS a ON b.auction_id = a.auction_id
+    INNER JOIN BUYER bu ON b.buyer_id = bu.buyer_id
+    WHERE bu.user_id = ?
+    GROUP BY a.auction_id
+    ORDER BY a.end_time DESC
+");
+if (!$stmt) {
+    die("Failed to prepare statement: " . $link->error);
+}
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$my_bids = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+$stmt->close();
+
 // Handle form submission to update user information
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['update_account'])) {
     $new_username = htmlspecialchars($_POST['username'], ENT_QUOTES, 'UTF-8');
@@ -111,6 +156,8 @@ $link->close();
             <div class="tabs">
                 <div class="tab active" onclick="showTab('account-info')">Account Information</div>
                 <div class="tab" onclick="showTab('history')">History</div>
+                <div class="tab" onclick="showTab('my-listings')">My Listings</div>
+                <div class="tab" onclick="showTab('my-bids')">My Bids</div>
             </div>
 
             <!-- Account Information Tab -->
@@ -229,6 +276,68 @@ $link->close();
                 </table>
             </div>
 
+            <!-- My Listings Tab -->
+            <div id="my-listings" class="tab-content">
+                <h2>My Listings</h2>
+                <div class="listings-container">
+                    <?php if (empty($my_listings)): ?>
+                        <p class="no-listings-message">You have not created any listings yet.</p>
+                    <?php else: ?>
+                        <?php foreach ($my_listings as $listing): ?>
+                            <div class="listing-card">
+                                <?php if (!empty($listing['image'])): ?>
+                                    <img src="data:image/jpeg;base64,<?php echo base64_encode($listing['image']); ?>" alt="<?php echo htmlspecialchars($listing['title']); ?>" class="listing-image">
+                                <?php else: ?>
+                                    <img src="images/no-image.jpg" alt="No Image Available" class="listing-image">
+                                <?php endif; ?>
+                                <div class="listing-details">
+                                    <h3><?php echo htmlspecialchars($listing['title']); ?></h3>
+                                    <p><strong>Start Price:</strong> ฿<?php echo number_format($listing['start_price'], 2); ?></p>
+                                    <p><strong>Current Bid:</strong> ฿<?php echo number_format($listing['bid_amount'], 2); ?></p>
+                                    <p><strong>End Time:</strong> <?php echo htmlspecialchars($listing['end_time']); ?></p>
+                                    <p><strong>Created At:</strong> <?php echo htmlspecialchars($listing['created_at']); ?></p>
+                                    <p><strong>Status:</strong> <?php echo htmlspecialchars($listing['status']); ?></p>
+                                    <a href="Product.php?auction_id=<?php echo $listing['auction_id']; ?>" class="view-details-button">View Details</a>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <!-- My Bids Tab -->
+            <div id="my-bids" class="tab-content">
+                <h2>My Bids</h2>
+                <div class="bids-container">
+                    <?php if (empty($my_bids)): ?>
+                        <p class="no-bids-message">You have not placed any bids yet.</p>
+                    <?php else: ?>
+                        <?php foreach ($my_bids as $bid): ?>
+                            <div class="bid-card <?php echo $bid['bid_status'] === 'highest' ? 'highest-bid' : 'surpassed-bid'; ?>">
+                                <?php if (!empty($bid['image'])): ?>
+                                    <img src="data:image/jpeg;base64,<?php echo base64_encode($bid['image']); ?>" alt="<?php echo htmlspecialchars($bid['title']); ?>" class="bid-image">
+                                <?php else: ?>
+                                    <img src="images/no-image.jpg" alt="No Image Available" class="bid-image">
+                                <?php endif; ?>
+                                <div class="bid-details">
+                                    <h3><?php echo htmlspecialchars($bid['title']); ?></h3>
+                                    <p><strong>Start Price:</strong> ฿<?php echo number_format($bid['start_price'], 2); ?></p>
+                                    <p><strong>Your Bid:</strong> ฿<?php echo number_format($bid['user_bid'], 2); ?></p>
+                                    <p><strong>Highest Bid:</strong> ฿<?php echo number_format($bid['highest_bid'], 2); ?></p>
+                                    <p><strong>End Time:</strong> <?php echo htmlspecialchars($bid['end_time']); ?></p>
+                                    <?php if ($bid['bid_status'] === 'highest'): ?>
+                                        <p class="bid-status">You are the highest bidder!</p>
+                                    <?php else: ?>
+                                        <p class="bid-status">Someone has surpassed your bid.</p>
+                                    <?php endif; ?>
+                                    <a href="Product.php?auction_id=<?php echo $bid['auction_id']; ?>" class="view-details-button">View Details</a>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
+            </div>
+
             <!-- Loading Spinner -->
             <div id="loading-spinner" style="display: none; text-align: center;">
                 <p>Loading...</p>
@@ -263,8 +372,8 @@ $link->close();
                 document.querySelector(`.tab[onclick="showTab('${tabId}')"]`).classList.add('active');
 
                 // Adjust margin-top dynamically based on the active tab
-                if (tabId === 'history') {
-                    contentWrapper.style.marginTop = '50px'; // Smaller margin for the History tab
+                if (tabId === 'history' || tabId === 'my-listings' || tabId === 'my-bids') {
+                    contentWrapper.style.marginTop = '50px'; // Smaller margin for History, My Listings, and My Bids tabs
                 } else {
                     contentWrapper.style.marginTop = '250px'; // Larger margin for the Account Information tab
                 }
