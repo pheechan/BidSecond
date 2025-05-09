@@ -39,9 +39,9 @@ $query = "
 $stmt = $pdo->prepare($query);
 $stmt->execute([':current_time' => $current_time]);
 
-// Update PENDING_TRANSACTIONS table with buyer_id
+/*
 $update_pending_query = "
-    UPDATE PENDING_TRANSACTIONS pt
+  UPDATE PENDING_TRANSACTIONS pt
     JOIN (
         SELECT 
             b.auction_id, 
@@ -57,8 +57,9 @@ $update_pending_query = "
     SET pt.buyer_id = winning_bids.buyer_id
     WHERE pt.buyer_id IS NULL
 ";
-$update_pending_stmt = $pdo->prepare($update_pending_query);
-$update_pending_stmt->execute();
+// $update_pending_stmt = $pdo->prepare($update_pending_query);
+// $update_pending_stmt->execute();
+*/
 
 // Insert into PENDING_TRANSACTIONS if needed
 $insert_query = "
@@ -66,22 +67,25 @@ $insert_query = "
     SELECT 
         a.auction_id, 
         a.seller_id, 
-        winning_bids.bid_amount, 
-        winning_bids.buyer_id, -- Use buyer_id from the BUYER table
+        wb.bid_amount, 
+        wb.buyer_id,
         u.address, 
         a.end_time, 
         'unpaid'
     FROM AUCTIONS a
     JOIN (
         SELECT 
-            b.auction_id, 
-            b.buyer_id, -- Use buyer_id directly from the BIDS table
-            MAX(b.bid_amount) AS bid_amount
-        FROM BIDS b
-        GROUP BY b.auction_id
-    ) AS winning_bids
-    ON a.auction_id = winning_bids.auction_id
-    JOIN BUYER br ON winning_bids.buyer_id = br.buyer_id -- Ensure buyer_id is valid
+            b1.auction_id,
+            b1.buyer_id,
+            b1.bid_amount
+        FROM BIDS b1
+        INNER JOIN (
+            SELECT auction_id, MAX(bid_amount) AS max_bid
+            FROM BIDS
+            GROUP BY auction_id
+        ) b2 ON b1.auction_id = b2.auction_id AND b1.bid_amount = b2.max_bid
+    ) AS wb ON a.auction_id = wb.auction_id
+    JOIN BUYER br ON wb.buyer_id = br.buyer_id
     JOIN USERS u ON br.user_id = u.user_id
     WHERE a.status = 'pending' AND a.auction_id NOT IN (
         SELECT auction_id FROM PENDING_TRANSACTIONS
