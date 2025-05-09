@@ -1,4 +1,5 @@
 <?php
+include_once 'init.php';
 session_start();
 
 // Check if the user is logged in

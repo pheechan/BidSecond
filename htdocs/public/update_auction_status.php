@@ -1,5 +1,5 @@
 <?php
-<?php
+
 $config = include(__DIR__ . '/../private/config.php'); // Load database configuration
 
 try {
