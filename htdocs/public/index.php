@@ -107,18 +107,42 @@ $hotBids = $hotBidsStmt->fetchAll();
         <div class="bidding-items">
             <?php if (count($hotBids) > 0): ?>
                 <?php foreach ($hotBids as $product): ?>
+                    <?php
+                        // Fetch end_time for this auction
+                        $stmt = $pdo->prepare("SELECT end_time FROM AUCTIONS WHERE auction_id = ?");
+                        $stmt->execute([$product['auction_id']]);
+                        $endTime = $stmt->fetchColumn();
+                        $now = new DateTime("now", new DateTimeZone("Asia/Bangkok")); // Use your server timezone
+                        $end = new DateTime($endTime, new DateTimeZone("Asia/Bangkok"));
+                        $interval = $now < $end ? $now->diff($end) : false;
+                    ?>
                     <div class="bidding-item">
-                        <a href="Product.php?auction_id=<?php echo $product['auction_id']; ?>">
-                            <?php if (!empty($product['image'])): ?>
-                                <img src="data:image/jpeg;base64,<?php echo base64_encode($product['image']); ?>" alt="<?php echo htmlspecialchars($product['title']); ?>">
-                            <?php else: ?>
-                                <img src="images/no-image.jpg" alt="No Image Available">
-                            <?php endif; ?>
-                            <p><?php echo htmlspecialchars($product['title']); ?></p>
-                            <p>Start Price: ฿<?php echo number_format($product['start_price'], 2); ?></p>
-                            <p>Current Bid: ฿<?php echo number_format($product['bid_amount'], 2); ?></p>
+                        <?php if (!empty($product['image'])): ?>
+                            <img src="data:image/jpeg;base64,<?php echo base64_encode($product['image']); ?>" alt="<?php echo htmlspecialchars($product['title']); ?>">
+                        <?php else: ?>
+                            <img src="images/no-image.jpg" alt="No Image Available">
+                        <?php endif; ?>
+                        <p class="item-title">
+                            <a href="Product.php?auction_id=<?php echo $product['auction_id']; ?>">
+                                <?php echo htmlspecialchars($product['title']); ?>
+                            </a>
+                        </p>
+                        <p>Start Price: ฿<?php echo number_format($product['start_price'], 2); ?></p>
+                        <p>Current Bid: ฿<?php echo number_format($product['bid_amount'], 2); ?></p>
+                        <?php if (isset($product['bid_count'])): ?>
                             <p>Total Bids: <?php echo $product['bid_count']; ?></p>
-                        </a>
+                        <?php endif; ?>
+                        <div class="countdown-timer <?php echo ($interval && $interval->days > 0) ? 'countdown-green' : 'countdown-red'; ?>">
+                            <?php if ($interval): ?>
+                                Time left: 
+                                <?php
+                                    if ($interval->d > 0) echo $interval->d . "d ";
+                                    printf("%02dh %02dm %02ds", $interval->h, $interval->i, $interval->s);
+                                ?>
+                            <?php else: ?>
+                                Auction ended
+                            <?php endif; ?>
+                        </div>
                     </div>
                 <?php endforeach; ?>
             <?php else: ?>
@@ -216,17 +240,41 @@ $hotBids = $hotBidsStmt->fetchAll();
         <div class="bidding-items">
             <?php if (count($randomProducts) > 0): ?>
                 <?php foreach ($randomProducts as $product): ?>
+                    <?php
+                        $stmt = $pdo->prepare("SELECT end_time FROM AUCTIONS WHERE auction_id = ?");
+                        $stmt->execute([$product['auction_id']]);
+                        $endTime = $stmt->fetchColumn();
+                        $now = new DateTime("now", new DateTimeZone("Asia/Bangkok"));
+                        $end = new DateTime($endTime, new DateTimeZone("Asia/Bangkok"));
+                        $interval = $now < $end ? $now->diff($end) : false;
+                    ?>
                     <div class="bidding-item">
-                        <a href="Product.php?auction_id=<?php echo $product['auction_id']; ?>">
-                            <?php if (!empty($product['image'])): ?>
-                                <img src="data:image/jpeg;base64,<?php echo base64_encode($product['image']); ?>" alt="<?php echo htmlspecialchars($product['title']); ?>">
+                        <?php if (!empty($product['image'])): ?>
+                            <img src="data:image/jpeg;base64,<?php echo base64_encode($product['image']); ?>" alt="<?php echo htmlspecialchars($product['title']); ?>">
+                        <?php else: ?>
+                            <img src="images/no-image.jpg" alt="No Image Available">
+                        <?php endif; ?>
+                        <p class="item-title">
+                            <a href="Product.php?auction_id=<?php echo $product['auction_id']; ?>">
+                                <?php echo htmlspecialchars($product['title']); ?>
+                            </a>
+                        </p>
+                        <p>Start Price: ฿<?php echo number_format($product['start_price'], 2); ?></p>
+                        <p>Current Bid: ฿<?php echo number_format($product['bid_amount'], 2); ?></p>
+                        <?php if (isset($product['bid_count'])): ?>
+                            <p>Total Bids: <?php echo $product['bid_count']; ?></p>
+                        <?php endif; ?>
+                        <div class="countdown-timer <?php echo ($interval && $interval->days > 0) ? 'countdown-green' : 'countdown-red'; ?>">
+                            <?php if ($interval): ?>
+                                Time left: 
+                                <?php
+                                    if ($interval->d > 0) echo $interval->d . "d ";
+                                    printf("%02dh %02dm %02ds", $interval->h, $interval->i, $interval->s);
+                                ?>
                             <?php else: ?>
-                                <img src="images/no-image.jpg" alt="No Image Available">
+                                Auction ended
                             <?php endif; ?>
-                            <p><?php echo htmlspecialchars($product['title']); ?></p>
-                            <p>Start Price: ฿<?php echo number_format($product['start_price'], 2); ?></p>
-                            <p>Current Bid: ฿<?php echo number_format($product['bid_amount'], 2); ?></p>
-                        </a>
+                        </div>
                     </div>
                 <?php endforeach; ?>
             <?php else: ?>

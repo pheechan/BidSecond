@@ -208,24 +208,74 @@ body {
     border-radius: 5px;
 }
 
+.category-card p {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #111;
+    margin: 0;
+}
+
+.category-card a {
+    text-decoration: none;
+}
+
 /* Bidding Items */
 .bidding-items {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
 }
 
 .bidding-item {
-    background-color: #f9f9f9;
-    padding: 20px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    text-align: center;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+    padding: 16px;
+    width: 250px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    position: relative;
+    min-height: 350px; /* adjust as needed */
 }
 
 .bidding-item img {
     width: 100%;
     border-radius: 5px;
+}
+
+.bidding-item p {
+    margin: 2px 0; /* Reduce vertical spacing */
+    font-size: 1em;
+}
+
+.bidding-item .countdown-timer {
+    margin-top: auto;
+    padding-top: 12px;
+    font-weight: bold;
+    color: #d32f2f;
+}
+
+.countdown-green {
+    color: #388e3c !important; /* green */
+}
+.countdown-red {
+    color: #d32f2f !important; /* red */
+}
+
+.bidding-item .item-title {
+    font-size: 1.2em;
+    font-weight: bold;
+    margin: 10px 0 5px 0;
+    margin-bottom: 6px; /* Slightly more space below the title */
+}
+.bidding-item .item-title a {
+    color: #333;
+    text-decoration: none;
+}
+.bidding-item .item-title a:hover {
+    color: #388e3c;
+    text-decoration: underline;
 }
 
 /* Footer */
