@@ -1,4 +1,9 @@
 <?php
+<?php
+// Set the default time zone to Indochina Time (ICT)
+date_default_timezone_set('Asia/Bangkok'); // Set time zone to Indochina Time (ICT)
+session_start();
+
 /*
 // Start the session
 if (session_status() === PHP_SESSION_NONE) {
