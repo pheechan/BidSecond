@@ -67,8 +67,18 @@ $hotBids = $hotBidsStmt->fetchAll();
                 </a>
             </div>
             <div class="search-bar">
-                <input type="text" placeholder="Search for items...">
-                <button type="submit">Search</button>
+                <!-- Search Bar -->
+                <form id="searchForm" class="search-bar" onsubmit="return openSearchPopup();">
+                    <input type="text" id="searchInput" name="q" placeholder="Search for items..." required>
+                    <button type="submit">Search</button>
+                </form>
+                <script>
+                function openSearchPopup() {
+                    const q = encodeURIComponent(document.getElementById('searchInput').value);
+                    window.open('search.php?q=' + q, 'searchPopup', 'width=900,height=700,scrollbars=yes');
+                    return false; // Prevent normal form submit
+                }
+                </script>
             </div>
             <nav class="nav-links">
                 <a href="sell.php">Sell</a>
@@ -341,3 +351,4 @@ $hotBids = $hotBidsStmt->fetchAll();
     </script>
 </body>
 </html>
+``` 
