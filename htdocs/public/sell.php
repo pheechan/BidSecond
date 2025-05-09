@@ -1,7 +1,7 @@
 <?php
-include_once 'init.php';
-session_start();
 
+session_start();
+// include_once 'init.php';
 if (!isset($_SESSION['user'])) {
     header("Location: login.php"); // Redirect to login if not logged in
     exit();
