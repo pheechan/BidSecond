@@ -65,10 +65,21 @@ $products = $stmt->fetchAll();
                     <img src="images/logo.png" alt="BidSecond Logo">
                 </a>
             </div>
+            <div class="search-bar">
+                <!-- Search Bar -->
+                <form id="searchForm" class="search-bar" action="search.php" method="get">
+                    <input type="text" id="searchInput" name="q" placeholder="Search for items..." required>
+                    <button type="submit">Search</button>
+                </form>
+            </div>
             <nav class="nav-links">
-                <a href="index.php">Home</a>
-                <a href="account.php">Account</a>
+                <a href="sell.php">Sell</a>
                 <a href="wallet.php">Balance</a>
+                <?php if ($user['roles'] === 'admin') { ?> <!-- Show Dashboard only for admin -->
+                    <a href="dashboard.php">Dashboard</a>
+                <?php } ?>
+                <a href="account.php">Account</a> <!-- Link to account.php -->
+                <a href="cart.php">Cart</a>
             </nav>
         </div>
     </header>
