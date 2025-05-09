@@ -1,12 +1,7 @@
 <?php
-<?php
 // Set the default time zone to Indochina Time (ICT)
 date_default_timezone_set('Asia/Bangkok'); // Set time zone to Indochina Time (ICT)
-session_start();
 
-$pdo->exec("SET time_zone = '+07:00'");
-
-/*
 // Start the session
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
@@ -25,7 +20,10 @@ try {
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
         ]
     );
-    
+
+    // Set the database session time zone to Asia/Bangkok
+    $pdo->exec("SET time_zone = '+07:00'");
+
 } catch (PDOException $e) {
     die("Database connection failed: " . $e->getMessage());
 }
