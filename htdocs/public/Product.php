@@ -81,16 +81,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['bid_amount'])) {
         } elseif ($user_balance < $bid_amount) {
             $error = "You do not have enough balance to place this bid.";
         } else {
-            // Update the auction's current bid
-            $update_bid_query = "UPDATE AUCTIONS SET bid_amount = ? WHERE auction_id = ?";
-            $update_bid_stmt = $pdo->prepare($update_bid_query);
-            $update_bid_stmt->execute([$bid_amount, $auction_id]);
+            try {
+                // Begin transaction
+                $pdo->beginTransaction();
 
-            $success = "Your bid has been placed successfully!";
+                // Insert into BUYER table
+                $insert_buyer_query = "
+                    INSERT INTO BUYER (user_id, auction_id) 
+                    VALUES (?, ?)
+                    ON DUPLICATE KEY UPDATE buyer_id = LAST_INSERT_ID(buyer_id)
+                ";
+                $insert_buyer_stmt = $pdo->prepare($insert_buyer_query);
+                $insert_buyer_stmt->execute([$user['user_id'], $auction_id]);
+                $buyer_id = $pdo->lastInsertId();
 
-            // Refresh the page to show updated data
-            header("Location: Product.php?auction_id=" . $auction_id);
-            exit();
+                // Insert into BIDS table
+                $insert_bid_query = "
+                    INSERT INTO BIDS (buyer_id, auction_id, bid_amount) 
+                    VALUES (?, ?, ?)
+                ";
+                $insert_bid_stmt = $pdo->prepare($insert_bid_query);
+                $insert_bid_stmt->execute([$buyer_id, $auction_id, $bid_amount]);
+
+                // Update the auction's current bid
+                $update_bid_query = "UPDATE AUCTIONS SET bid_amount = ? WHERE auction_id = ?";
+                $update_bid_stmt = $pdo->prepare($update_bid_query);
+                $update_bid_stmt->execute([$bid_amount, $auction_id]);
+
+                // Commit transaction
+                $pdo->commit();
+
+                $success = "Your bid has been placed successfully!";
+
+                // Refresh the page to show updated data
+                header("Location: Product.php?auction_id=" . $auction_id);
+                exit();
+            } catch (Exception $e) {
+                // Rollback transaction on error
+                $pdo->rollBack();
+                $error = "An error occurred while placing your bid. Please try again.";
+            }
         }
     }
 }
