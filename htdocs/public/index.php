@@ -26,6 +26,28 @@ try {
 } catch (PDOException $e) {
     die("Database connection failed: " . $e->getMessage());
 }
+
+// Fetch the top 4 products with the most bids
+$hotBidsQuery = "
+    SELECT 
+        a.auction_id, 
+        a.title, 
+        a.image, 
+        a.start_price, 
+        a.bid_amount, 
+        COUNT(b.bid_id) AS bid_count
+    FROM BIDS b
+    INNER JOIN AUCTIONS a ON b.auction_id = a.auction_id
+    WHERE a.status = 'active'
+    GROUP BY b.auction_id
+    ORDER BY bid_count DESC
+    LIMIT 4
+";
+$hotBidsStmt = $pdo->prepare($hotBidsQuery);
+if (!$hotBidsStmt->execute()) {
+    die("Query failed: " . implode(", ", $hotBidsStmt->errorInfo()));
+}
+$hotBids = $hotBidsStmt->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="th">
@@ -82,90 +104,88 @@ try {
 
         <!-- Hot Bids Section -->
         <h2 class="section-title">Hot Bids</h2>
-        <div class="hot-bids">
-            <button class="arrow left-arrow" onclick="scrollHotBids(-1)">&#10094;</button>
-            <div class="hot-bids-container">
-                <div class="bid-item">Hot Bid 1</div>
-                <div class="bid-item">Hot Bid 2</div>
-                <div class="bid-item">Hot Bid 3</div>
-                <div class="bid-item">Hot Bid 4</div>
-            </div>
-            <button class="arrow right-arrow" onclick="scrollHotBids(1)">&#10095;</button>
+        <div class="bidding-items">
+            <?php if (count($hotBids) > 0): ?>
+                <?php foreach ($hotBids as $product): ?>
+                    <div class="bidding-item">
+                        <a href="Product.php?auction_id=<?php echo $product['auction_id']; ?>">
+                            <?php if (!empty($product['image'])): ?>
+                                <img src="data:image/jpeg;base64,<?php echo base64_encode($product['image']); ?>" alt="<?php echo htmlspecialchars($product['title']); ?>">
+                            <?php else: ?>
+                                <img src="images/no-image.jpg" alt="No Image Available">
+                            <?php endif; ?>
+                            <p><?php echo htmlspecialchars($product['title']); ?></p>
+                            <p>Start Price: ฿<?php echo number_format($product['start_price'], 2); ?></p>
+                            <p>Current Bid: ฿<?php echo number_format($product['bid_amount'], 2); ?></p>
+                            <p>Total Bids: <?php echo $product['bid_count']; ?></p>
+                        </a>
+                    </div>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <p class="no-products-message">No hot bids available at the moment. Please check back later!</p>
+            <?php endif; ?>
         </div>
 
         <!-- Categories Section -->
-        
         <h2 class="section-title">Categories</h2>
         <div class="categories">
             <div class="category-card">
                 <a href="category.php?category=Electronics">
-                    
                     <p>Electronics</p>
                 </a>
             </div>
             <div class="category-card">
                 <a href="category.php?category=Fashion">
-                    
                     <p>Fashion</p>
                 </a>
             </div>
             <div class="category-card">
                 <a href="category.php?category=Home and Garden">
-                    
                     <p>Home and Garden</p>
                 </a>
             </div>
             <div class="category-card">
                 <a href="category.php?category=Toys and Games">
-                    
                     <p>Toys and Games</p>
                 </a>
             </div>
             <div class="category-card">
                 <a href="category.php?category=Automotive">
-                    
                     <p>Automotive</p>
                 </a>
             </div>
             <div class="category-card">
                 <a href="category.php?category=Sports and Outdoors">
-                    
                     <p>Sports and Outdoors</p>
                 </a>
             </div>
             <div class="category-card">
                 <a href="category.php?category=Books and Media">
-                    
                     <p>Books and Media</p>
                 </a>
             </div>
             <div class="category-card">
                 <a href="category.php?category=Health and Beauty">
-                    
                     <p>Health and Beauty</p>
                 </a>
             </div>
             <div class="category-card">
                 <a href="category.php?category=Jewelry and Watches">
-                    
                     <p>Jewelry and Watches</p>
                 </a>
             </div>
             <div class="category-card">
                 <a href="category.php?category=Music and Instruments">
-                    
                     <p>Music and Instruments</p>
                 </a>
             </div>
             <div class="category-card">
                 <a href="category.php?category=Collectibles and Antiques">
-                    
                     <p>Collectibles and Antiques</p>
                 </a>
             </div>
             <div class="category-card">
                 <a href="category.php?category=Art and Craft">
-                    
                     <p>Art and Craft</p>
                 </a>
             </div>
@@ -192,7 +212,6 @@ try {
         $randomProducts = $stmt->fetchAll();
         ?>
 
-        <!-- Items on Bidding Section -->
         <h2 class="section-title">Items on Bidding</h2>
         <div class="bidding-items">
             <?php if (count($randomProducts) > 0): ?>
@@ -271,16 +290,6 @@ try {
         // Initialize the slideshow and dots
         setupDots();
         showSlides();
-    </script>
-    <script>
-        function scrollHotBids(direction) {
-            const container = document.querySelector(".hot-bids-container");
-            const scrollAmount = 300; // Adjust the scroll amount as needed
-            container.scrollBy({
-                left: direction * scrollAmount,
-                behavior: "smooth",
-            });
-        }
     </script>
 </body>
 </html>
