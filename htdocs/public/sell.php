@@ -97,133 +97,78 @@ $link->close();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sell - BidSecond</title>
-    <link rel="stylesheet" href="styles/auth.css"> <!-- Use shared CSS -->
-    <link rel="stylesheet" href="styles/sell.css"> <!-- Add sell-specific CSS -->
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="styles/account.css">
+    <link rel="stylesheet" href="styles/sell.css">
     <style>
-        /* Ensure the body starts from the top */
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: Arial, sans-serif;
-            overflow-x: hidden; /* Prevent horizontal scrolling */
-        }
-
-        /* Adjust the content-wrapper to prevent the header from being cut off */
-        .content-wrapper {
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start; /* Align content to the top */
-            align-items: center;
-            width: 100%;
-            height: 100%;
-        }
-
-        /* Ensure the content-box is properly spaced */
+        /* Only keep styles unique to sell.php that are not in account.css */
         .content-box {
-            background-color: #fff;
-            padding: 20px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            width: 90%; /* Adjust width to leave some margin on the sides */
-            margin: 0 auto; /* Center the content horizontally */
+            position: relative;
         }
-
-        .form-group {
-            margin-bottom: 0px;
-        }
-
-        .form-group label {
-            display: block;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            box-sizing: border-box;
-        }
-
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
-            border-color: #007bff;
-            outline: none;
-        }
-
-        .form-group-box {
-            background-color: #f9f9f9;
-            padding: 15px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-
-        .create-button {
-            background-color: #007bff;
-            color: #fff;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        .create-button:hover {
-            background-color: #0056b3;
-        }
-
-        .message {
-            color: green;
-            font-weight: bold;
-            margin-bottom: 20px;
-        }
-
-        /* Back to Home Button Styling */
         .back-to-home-button {
             display: inline-block;
-            position: fixed; /* Fix the button to the top-left */
-            top: 10px; /* Adjust the distance from the top */
-            left: 10px; /* Adjust the distance from the left */
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: #fff;
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            padding: 10px 15px;
+            background-color: #57a05a;
+            color: white;
             text-decoration: none;
             border-radius: 5px;
             font-weight: bold;
-            text-align: center;
-            z-index: 1000; /* Ensure it stays on top of other elements */
+            font-size: 14px;
+            z-index: 10;
+            transition: background-color 0.3s ease;
         }
-
         .back-to-home-button:hover {
-            background-color: #0056b3;
+            background-color: #45a049;
         }
-
-        /* Image preview container adjustments */
+        .create-button {
+            padding: 10px 20px;
+            background-color: #57a05a;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+        }
+        .create-button:hover {
+            background-color: #45a049;
+        }
+        .content-box h1 {
+            color: #57a05a;
+            margin-top: 0;
+            margin-bottom: 30px;
+            font-size: 2em;
+            font-weight: bold;
+        }
         #image-preview-container {
-            margin-top: 10px; /* Add space above the preview */
-            max-height: 200px; /* Limit the height of the preview */
-            overflow-y: auto; /* Allow scrolling if the image is too large */
-            position: static; /* Ensure it stays in the normal document flow */
-            display: block; /* Ensure it takes up space */
+            margin-top: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+            position: static;
+            display: block;
+        }
+        
+        #description {
+            min-height: 120px;
+            min-width: 100%;
+            font-size: 16px;
+            resize: vertical;
         }
     </style>
 </head>
 <body>
     <div class="content-wrapper">
-        <!-- Back to Home Button -->
-        <a href="index.php" class="back-to-home-button">Back to Home</a>
-
         <div class="content-box">
+            <!-- Back to Home Button (top left inside content box) -->
+            <a href="index.php" class="back-to-home-button">Back to Home</a>
             <h1>Create a New Auction</h1>
-
             <?php if (!empty($message)) { ?>
                 <p class="message"><?php echo $message; ?></p>
             <?php } ?>
-
             <form action="sell.php" method="POST" enctype="multipart/form-data">
                 <div class="form-group">
                     <label for="title">Auction Title</label>

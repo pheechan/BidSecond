@@ -131,89 +131,64 @@ $pendingItems = $stmt->fetchAll();
     <title>Cart - BidSecond</title>
     <link rel="stylesheet" href="styles/main.css">
     <style>
-        /* Ensure the body and html take up the full height */
-        html, body {
-            height: 100%;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* Main content should take up all available space */
-        #main-content {
-            flex: 1;
-        }
-
-        /* Footer stays at the bottom */
-        #footer {
-            text-align: center;
-            padding: 10px;
-            background-color: #57a05a;
-            position: relative;
-            bottom: 0;
-            width: 100%;
-        }
-
         .cart-items {
             display: flex;
             flex-direction: column;
-            gap: 20px; /* Add spacing between boxes */
+            gap: 20px;
             padding: 20px;
         }
-
         .cart-item {
-            display: flex; /* Use flexbox for layout */
-            justify-content: space-between; /* Space between details and image */
-            align-items: center; /* Align items vertically */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             border: 1px solid #ccc;
             border-radius: 10px;
             padding: 20px;
             background-color: #f9f9f9;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-
         .cart-item-content {
-            display: flex; /* Flex container for details and image */
-            gap: 20px; /* Space between details and image */
-            width: 100%; /* Ensure it takes full width */
+            display: flex;
+            gap: 20px;
+            width: 100%;
         }
-
         .cart-item-details {
-            flex: 3; /* Take up more space for details */
+            flex: 3;
         }
-
         .cart-item-image {
-            flex: 0; /* Take up less space for the image */
+            flex: 0;
             display: flex;
             justify-content: center;
             align-items: center;
         }
-
         .cart-item-image img {
-            width: 200px; /* Set the image width */
-            height: 200px; /* Set the image height */
-            object-fit: cover; /* Ensure the image fits within the box */
-            border-radius: 5px; /* Optional: rounded corners */
+            width: 200px;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 5px;
         }
-
         .cart-item-details p {
-            margin: 5px 0; /* Add spacing between paragraphs */
-            font-size: 16px; /* Adjust font size */
+            margin: 5px 0;
+            font-size: 16px;
         }
-
         .cart-item-details button {
             margin-top: 10px;
             padding: 10px 20px;
-            background-color: #57a05a; /* Button background color */
+            background-color: #57a05a;
             color: white;
             border: none;
             border-radius: 5px;
             cursor: pointer;
             font-size: 16px;
         }
-
         .cart-item-details button:hover {
-            background-color: #459048; /* Darker green on hover */
+            background-color: #459048;
+        }
+        .no-items-message {
+            text-align: center;
+            color: #888;
+            margin-top: 40px;
+            font-size: 1.2em;
         }
     </style>
 </head>
