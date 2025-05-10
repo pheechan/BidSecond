@@ -54,6 +54,7 @@
 }
 #filterDropdown label {
     cursor: pointer;
+    color: #57a05a;
 }
 #filterDropdown input[type="radio"] {
     accent-color: #57a05a;

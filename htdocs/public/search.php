@@ -132,5 +132,33 @@ $results = $stmt->fetchAll();
         <p>&copy; 2025 BidSecond. All rights reserved.</p>
     </footer>
     <script src="scripts/main.js"></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var filterBtn = document.getElementById('filterBtn');
+        var dropdown = document.getElementById('filterDropdown');
+        var closeFilter = document.getElementById('closeFilter');
+
+        if (filterBtn && dropdown) {
+            filterBtn.onclick = function(e) {
+                e.preventDefault();
+                dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+            };
+        }
+        if (closeFilter && dropdown) {
+            closeFilter.onclick = function() {
+                dropdown.style.display = 'none';
+            };
+        }
+        document.addEventListener('click', function(e) {
+            if (
+                filterBtn && dropdown &&
+                !filterBtn.contains(e.target) &&
+                !dropdown.contains(e.target)
+            ) {
+                dropdown.style.display = 'none';
+            }
+        });
+    });
+    </script>
 </body>
 </html>

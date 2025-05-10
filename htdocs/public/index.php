@@ -319,72 +319,77 @@ $hotBids = $hotBidsStmt->fetchAll();
 
     <script src="scripts/main.js"></script>
     <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Slideshow logic
         let slideIndex = 0;
-
         function showSlides(index = null) {
             const slides = document.getElementsByClassName("mySlides");
             const dots = document.getElementsByClassName("dot");
-
-            // If an index is provided (dot clicked), update the slideIndex
             if (index !== null) {
                 slideIndex = index;
             } else {
-                // Increment slide index for automatic slideshow
                 slideIndex++;
                 if (slideIndex > slides.length) {
-                    slideIndex = 1; // Reset to the first slide
+                    slideIndex = 1;
                 }
             }
-
-            // Hide all slides
             for (let i = 0; i < slides.length; i++) {
                 slides[i].style.display = "none";
             }
-
-            // Remove active class from all dots
             for (let i = 0; i < dots.length; i++) {
                 dots[i].className = dots[i].className.replace(" active", "");
             }
-
-            // Show the current slide and activate the corresponding dot
             slides[slideIndex - 1].style.display = "block";
             dots[slideIndex - 1].className += " active";
-
-            // Automatically change slides every 3 seconds if no dot is clicked
             if (index === null) {
                 setTimeout(showSlides, 3000);
             }
         }
-
-        // Add click event listeners to dots
         function setupDots() {
             const dots = document.getElementsByClassName("dot");
             for (let i = 0; i < dots.length; i++) {
-                dots[i].addEventListener("click", () => showSlides(i + 1));
+                dots[i].addEventListener("click", function(e) {
+                    e.stopPropagation();
+                    showSlides(i + 1);
+                });
             }
         }
-
-        // Initialize the slideshow and dots
         setupDots();
         showSlides();
 
-        document.getElementById('filterBtn').onclick = function(e) {
-            e.preventDefault();
-            var dropdown = document.getElementById('filterDropdown');
-            dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
-        };
-        // Hide dropdown when OK is clicked
-        document.getElementById('closeFilter').onclick = function() {
-            document.getElementById('filterDropdown').style.display = 'none';
-        };
-        // Optional: Hide dropdown if click outside
+        // Filter button logic
+        var filterBtn = document.getElementById('filterBtn');
+        var dropdown = document.getElementById('filterDropdown');
+        var closeFilter = document.getElementById('closeFilter');
+
+        if (filterBtn && dropdown) {
+            filterBtn.onclick = function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+            };
+        }
+        if (dropdown) {
+            dropdown.onclick = function(e) {
+                e.stopPropagation();
+            };
+        }
+        if (closeFilter && dropdown) {
+            closeFilter.onclick = function(e) {
+                e.preventDefault();
+                dropdown.style.display = 'none';
+            };
+        }
         document.addEventListener('click', function(e) {
-            var filterBtn = document.getElementById('filterBtn');
-            var dropdown = document.getElementById('filterDropdown');
-            if (!filterBtn.contains(e.target) && !dropdown.contains(e.target)) {
+            if (
+                filterBtn && dropdown &&
+                !filterBtn.contains(e.target) &&
+                !dropdown.contains(e.target)
+            ) {
                 dropdown.style.display = 'none';
             }
         });
+    });
     </script>
 </body>
 </html>
