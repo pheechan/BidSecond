@@ -281,6 +281,13 @@ if ($show_otp_form || !empty($error_message)) {
                     <input type="text" name="otp[]" maxlength="1" class="otp-box" required>
                     <input type="text" name="otp[]" maxlength="1" class="otp-box" required>
                 </div>
+                <div class="otp-help-tooltip" style="margin-top:12px;">
+                    <span class="otp-help-link">Can't find mail?</span>
+                    <span class="otp-tooltip-text">
+                        If you didn't receive the email, please check your Spam or Trash folder.<br>
+                        If you still can't find it, click "Send New Code" to resend the OTP.
+                    </span>
+                </div>
                 <input type="hidden" name="email" value="<?php echo htmlspecialchars($email); ?>">
                 <div>
                     <button type="button" name="generate_otp" value="Generate" onclick="removeOtpRequirement()">Send New Code</button>

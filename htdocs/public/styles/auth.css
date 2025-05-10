@@ -131,3 +131,46 @@ button:hover {
     border-color: #66bb6a;
     box-shadow: 0 2px 6px rgba(102, 187, 106, 0.5);
 }
+
+/* OTP help tooltip */
+.otp-help-tooltip {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.otp-help-link {
+    color: #388e3c;
+    text-decoration: underline dotted;
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.otp-tooltip-text {
+    visibility: hidden;
+    width: 270px;
+    background-color: #fff;
+    color: #333;
+    text-align: left;
+    border-radius: 6px;
+    border: 1px solid #57a05a;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 12px 14px;
+    position: absolute;
+    z-index: 10;
+    left: 50%;
+    transform: translateX(-50%);
+    top: 28px;
+    font-size: 14px;
+    line-height: 1.5;
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+}
+
+.otp-help-tooltip:hover .otp-tooltip-text,
+.otp-help-tooltip:focus-within .otp-tooltip-text {
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
+}
