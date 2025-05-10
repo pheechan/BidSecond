@@ -255,6 +255,17 @@ $total_revenue_per_category = $pdo->query("
             }
         }
 
+        function editBalance(userId) {
+            var newBalance = prompt('Enter new balance for this user:');
+            if (newBalance !== null && !isNaN(newBalance) && newBalance !== '') {
+                fetch('api_user_action.php', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+                    body: `action=edit_balance&user_id=${userId}&balance=${encodeURIComponent(newBalance)}`
+                }).then(r=>r.text()).then(alert).then(()=>location.reload());
+            }
+        }
+
         function deleteAuction(auctionId) {
             if(confirm('Delete this auction?')) {
                 fetch('api_auction_action.php', {
@@ -411,8 +422,11 @@ $total_revenue_per_category = $pdo->query("
                                             <option value="admin" <?php echo $user['roles'] === 'admin' ? 'selected' : ''; ?>>Admin</option>
                                             <option value="user" <?php echo $user['roles'] === 'user' ? 'selected' : ''; ?>>User</option>
                                         </select>
+                                    </td>
+                                    <td><?php echo htmlspecialchars($user['created_at']); ?></td>
+                                    <td>
                                         <button onclick="deleteUser(<?php echo $user['user_id']; ?>)">Delete</button>
-                                        <button onclick="resetPassword(<?php echo $user['user_id']; ?>)">Reset Password</button>
+                                        <button onclick="editBalance(<?php echo $user['user_id']; ?>)">Edit Balance</button>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
