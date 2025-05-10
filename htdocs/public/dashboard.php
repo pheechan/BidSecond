@@ -48,31 +48,34 @@ $server_info = [
 
 // Fetch data for Report and Analytics
 
-// Top 10 Highest Bids
+// Top 20 Highest Bids
 $top_highest_bids = $pdo->query("
-    SELECT auction_id, MAX(bid_amount) AS highest_bid 
-    FROM BIDS 
-    GROUP BY auction_id 
+    SELECT b.auction_id, a.title, MAX(b.bid_amount) AS highest_bid 
+    FROM BIDS b
+    JOIN AUCTIONS a ON b.auction_id = a.auction_id
+    GROUP BY b.auction_id, a.title
     ORDER BY highest_bid DESC 
-    LIMIT 10
+    LIMIT 20
 ")->fetchAll();
 
-// Top 10 Lowest Bids
+// Top 20 Lowest Bids
 $top_lowest_bids = $pdo->query("
-    SELECT auction_id, MIN(bid_amount) AS lowest_bid 
-    FROM BIDS 
-    GROUP BY auction_id 
+    SELECT b.auction_id, a.title, MIN(b.bid_amount) AS lowest_bid 
+    FROM BIDS b
+    JOIN AUCTIONS a ON b.auction_id = a.auction_id
+    GROUP BY b.auction_id, a.title
     ORDER BY lowest_bid ASC 
-    LIMIT 10
+    LIMIT 20
 ")->fetchAll();
 
-// Top 10 Most Bids
+// Top 20 Most Bids
 $top_most_bids = $pdo->query("
-    SELECT auction_id, COUNT(bid_id) AS bid_count 
-    FROM BIDS 
-    GROUP BY auction_id 
+    SELECT b.auction_id, a.title, COUNT(b.bid_id) AS bid_count 
+    FROM BIDS b
+    JOIN AUCTIONS a ON b.auction_id = a.auction_id
+    GROUP BY b.auction_id, a.title
     ORDER BY bid_count DESC 
-    LIMIT 10
+    LIMIT 20
 ")->fetchAll();
 
 // Ranking of Categories by Highest Bid
@@ -107,10 +110,12 @@ $average_bid_price = $pdo->query("
 // Total Revenue Generated per Category
 $total_revenue_per_category = $pdo->query("
     SELECT 
-        category, 
-        SUM(bid_amount) AS total_revenue 
-    FROM AUCTIONS 
-    GROUP BY category
+    a.category, 
+    SUM(pt.bid_amount) AS total_revenue 
+    FROM PENDING_TRANSACTIONS pt
+    JOIN AUCTIONS a ON pt.auction_id = a.auction_id
+    WHERE pt.payment_status = 'paid'
+    GROUP BY a.category
 ")->fetchAll();
 ?>
 <!DOCTYPE html>
@@ -121,6 +126,7 @@ $total_revenue_per_category = $pdo->query("
     <title>Dashboard - BidSecond</title>
     <link rel="stylesheet" href="styles/dashboard.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@^2.0.0"></script>
     <style>
         html {
             scroll-behavior: smooth;
@@ -280,18 +286,17 @@ $total_revenue_per_category = $pdo->query("
         }
     </script>
     <script>
-        // Pass PHP arrays to JS
         window.analyticsData = {
             highestBids: {
-                labels: <?php echo json_encode(array_column($top_highest_bids, 'auction_id')); ?>,
+                labels: <?php echo json_encode(array_column($top_highest_bids, 'title')); ?>,
                 data: <?php echo json_encode(array_map('floatval', array_column($top_highest_bids, 'highest_bid'))); ?>
             },
             lowestBids: {
-                labels: <?php echo json_encode(array_column($top_lowest_bids, 'auction_id')); ?>,
+                labels: <?php echo json_encode(array_column($top_lowest_bids, 'title')); ?>,
                 data: <?php echo json_encode(array_map('floatval', array_column($top_lowest_bids, 'lowest_bid'))); ?>
             },
             mostBids: {
-                labels: <?php echo json_encode(array_column($top_most_bids, 'auction_id')); ?>,
+                labels: <?php echo json_encode(array_column($top_most_bids, 'title')); ?>,
                 data: <?php echo json_encode(array_map('intval', array_column($top_most_bids, 'bid_count'))); ?>
             },
             categoryRanking: {
@@ -575,18 +580,21 @@ $total_revenue_per_category = $pdo->query("
                     <label for="analytics-dropdown">Select a Report:</label>
                     <select id="analytics-dropdown" onchange="showGraph(this.value)">
                         <option value="">-- Select a Report --</option>
-                        <option value="highest-bids">Top 10 Highest Bids</option>
-                        <option value="lowest-bids">Top 10 Lowest Bids</option>
-                        <option value="most-bids">Top 10 Most Bids</option>
-                        <option value="category-ranking">Ranking of Categories by Highest Bid</option>
+                        <option value="highest-bids">Top 20 Highest Bids</option>
+                        <option value="lowest-bids">Top 20 Lowest Bids</option>
+                        <option value="most-bids">Top 20 Most Bids</option>
                         <option value="average-start-price">Average Starting Price per Category</option>
                         <option value="average-bid-price">Average Bid Price per Category</option>
                         <option value="total-revenue">Total Revenue Generated per Category</option>
                     </select>
 
-                    <!-- Graph Container -->
-                    <div id="graph-container" style="width: 100%; max-width: 800px; margin: 20px auto;">
-                        <canvas id="analytics-graph"></canvas>
+                    <div id="analytics-flex" style="display: flex; gap: 20px; margin-top: 20px;">
+                        <div id="graph-container" style="flex: 1; max-width: 50%;">
+                            <canvas id="analytics-graph" style="width: 100%; height: 400px;"></canvas>
+                        </div>
+                        <div id="analytics-table-container" style="flex: 1; max-width: 50%;">
+                            <!-- Table will be rendered here by JS -->
+                        </div>
                     </div>
                 </section>
 
