@@ -22,17 +22,8 @@ $pdo = new PDO(
 $message = '';
 $auction_id = isset($_GET['auction_id']) ? intval($_GET['auction_id']) : 0;
 
-// Handle image deletion FIRST
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_image'], $_POST['auction_id'])) {
-    $auction_id = intval($_POST['auction_id']);
-    $stmt = $pdo->prepare("UPDATE AUCTIONS SET image = NULL WHERE auction_id = ?");
-    $stmt->execute([$auction_id]);
-    header("Location: edit_auction.php?auction_id=" . $auction_id . "&success=1");
-    exit();
-}
-
 // Handle form submission
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['auction_id']) && !isset($_POST['delete_image'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['auction_id'])) {
     $auction_id = intval($_POST['auction_id']);
     $title = trim($_POST['title']);
     $category = trim($_POST['category']);
@@ -52,11 +43,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['auction_id']) && !iss
 
     $stmt = $pdo->prepare("UPDATE AUCTIONS SET title=?, category=?, description=?, start_price=?, bid_amount=?, min_increment=?, end_time=?, status=? WHERE auction_id=?");
     if ($stmt->execute([$title, $category, $description, $start_price, $bid_amount, $min_increment, $end_time, $status, $auction_id])) {
+        // Redirect to the same page to prevent resubmission and show updated data
         header("Location: edit_auction.php?auction_id=" . $auction_id . "&success=1");
         exit();
     } else {
         $message = "Failed to update auction.";
     }
+}
+
+// Handle image deletion
+if (isset($_POST['delete_image']) && isset($_POST['auction_id'])) {
+    $auction_id = intval($_POST['auction_id']);
+    $stmt = $pdo->prepare("UPDATE AUCTIONS SET image = NULL WHERE auction_id = ?");
+    $stmt->execute([$auction_id]);
+    // Reload to show the updated state
+    header("Location: edit_auction.php?auction_id=" . $auction_id . "&success=1");
+    exit();
 }
 
 // Fetch auction details
@@ -84,13 +86,55 @@ $statuses = ["active", "pending", "ended"];
     <meta charset="UTF-8">
     <title>Edit Auction #<?php echo $auction_id; ?> - BidSecond</title>
     <link rel="stylesheet" href="styles/main.css">
-    <link rel="stylesheet" href="styles/edit_auction.css">
+    <style>
+        .edit-auction-form {
+            max-width: 500px;
+            margin: 40px auto;
+            background: #fff;
+            padding: 24px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+        .edit-auction-form label {
+            font-weight: bold;
+            display: block;
+            margin-top: 16px;
+        }
+        .edit-auction-form input, .edit-auction-form select, .edit-auction-form textarea {
+            width: 100%;
+            padding: 8px;
+            margin-top: 4px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        .edit-auction-form button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background: #57a05a;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .edit-auction-form button:hover {
+            background: #388e3c;
+        }
+        .edit-auction-form img {
+            max-width: 100%;
+            margin-top: 10px;
+            border-radius: 6px;
+        }
+        .message {
+            color: green;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+    </style>
 </head>
 <body>
     <div class="edit-auction-form">
-        <!-- Back button at the top left -->
-        <a href="dashboard.php" class="back-button">&larr; Back</a>
-        <h2 style="margin-top: 50px;">Edit Auction #<?php echo $auction_id; ?></h2>
+        <h2>Edit Auction #<?php echo $auction_id; ?></h2>
         <?php if ($message): ?>
             <div class="message"><?php echo htmlspecialchars($message); ?></div>
         <?php endif; ?>
@@ -140,12 +184,6 @@ $statuses = ["active", "pending", "ended"];
 
             <button type="submit">Save Changes</button>
         </form>
-        <?php if (!empty($auction['image'])): ?>
-            <form method="POST" style="margin-top:10px;">
-                <input type="hidden" name="auction_id" value="<?php echo $auction_id; ?>">
-                <button type="submit" name="delete_image" value="1" style="background:#ea4335;color:#fff;border:none;padding:8px 16px;border-radius:5px;cursor:pointer;">Delete Image</button>
-            </form>
-        <?php endif; ?>
     </div>
 </body>
 </html>
