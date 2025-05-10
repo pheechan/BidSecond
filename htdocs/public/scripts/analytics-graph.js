@@ -108,12 +108,15 @@ document.addEventListener('DOMContentLoaded', function () {
                         }
                     },
                     y: {
-                        type: 'logarithmic',
-                        min: 1,
+                        type: (type === 'most-bids') ? 'linear' : 'logarithmic',
+                        beginAtZero: true,
+                        min: (type === 'most-bids') ? 0 : 1,
                         ticks: {
                             display: false,
                             callback: function(value) {
-                                return value === 1 ? '0' : value;
+                                return (type === 'most-bids')
+                                    ? (value === 0 ? '0' : value)
+                                    : (value === 1 ? '0' : value);
                             }
                         },
                         grid: {
