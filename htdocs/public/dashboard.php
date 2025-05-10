@@ -357,7 +357,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }]
         },
         options: {
-            responsive: true,
+            responsive: false,
             plugins: {
                 legend: { position: 'bottom' }
             }
@@ -422,12 +422,10 @@ document.addEventListener('DOMContentLoaded', function () {
                             <p>฿<?php echo number_format(array_sum(array_column($withdraws, 'withdraw_amount')), 2); ?></p>
                         </div>
                     </div>
-                    <div style="display: flex; gap: 40px; margin-top: 40px;">
-                        <div style="flex:1;">
-                        </div>
-                        <div style="flex:1;">
-                            <h3 style="text-align:center;">Money Flow</h3>
-                            <canvas id="summary-pie" height="300"></canvas>
+                    <div style="display: flex; justify-content: center; margin-top: 30px;">
+                        <div style="background: #fff; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.07); padding: 24px 32px;">
+                            <h3 style="text-align:center; margin-bottom: 10px;">Money Flow</h3>
+                            <canvas id="summary-pie" width="280" height="280"></canvas>
                         </div>
                     </div>
                 </section>
