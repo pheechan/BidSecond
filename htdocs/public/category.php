@@ -152,11 +152,18 @@ $products = $stmt->fetchAll();
         if (filterBtn && dropdown) {
             filterBtn.onclick = function(e) {
                 e.preventDefault();
+                e.stopPropagation(); // Prevent closing immediately
                 dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
             };
         }
+        if (dropdown) {
+            dropdown.onclick = function(e) {
+                e.stopPropagation(); // Prevent closing when clicking inside dropdown
+            };
+        }
         if (closeFilter && dropdown) {
-            closeFilter.onclick = function() {
+            closeFilter.onclick = function(e) {
+                e.preventDefault();
                 dropdown.style.display = 'none';
             };
         }
