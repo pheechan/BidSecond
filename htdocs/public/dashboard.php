@@ -681,8 +681,16 @@ document.addEventListener('DOMContentLoaded', function () {
                         <li>PHP Version: <?php echo $server_info['php_version']; ?></li>
                         <li>MySQL Version: <?php echo $server_info['mysql_version']; ?></li>
                         <li>Server IP: <?php echo $server_info['server_ip']; ?></li>
-                        <li>Server Time: <?php echo $server_info['server_time']; ?></li>
                         <li>Timezone: <?php echo $server_info['timezone']; ?></li>
+                        <li>Web Server: <?php echo $_SERVER['SERVER_SOFTWARE'] ?? 'Unknown'; ?></li>
+                        <li>Document Root: <?php echo $_SERVER['DOCUMENT_ROOT'] ?? 'Unknown'; ?></li>
+                        <li>Server Protocol: <?php echo $_SERVER['SERVER_PROTOCOL'] ?? 'Unknown'; ?></li>
+                        <li>Server Port: <?php echo $_SERVER['SERVER_PORT'] ?? 'Unknown'; ?></li>
+                        <li>PHP SAPI: <?php echo php_sapi_name(); ?></li>
+                        <li>Max Upload Size: <?php echo ini_get('upload_max_filesize'); ?></li>
+                        <li>Max POST Size: <?php echo ini_get('post_max_size'); ?></li>
+                        <li>Memory Limit: <?php echo ini_get('memory_limit'); ?></li>
+                        <li>Loaded PHP Extensions: <?php echo implode(', ', get_loaded_extensions()); ?></li>
                     </ul>
                 </section>
             </main>
