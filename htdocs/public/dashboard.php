@@ -520,7 +520,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                     <td>
                         
                                         <button class="edit-auction" style="background: #57a05a; color: #fff; border: none; border-radius: 5px; padding: 6px 14px; margin: 2px; cursor: pointer; transition: background 0.2s;" onclick="editAuction(<?php echo $auction['auction_id']; ?>)">
-                                            ✏️ Edit
+                                            Edit
                                         </button>
                                     </td>
                                 </tr>
