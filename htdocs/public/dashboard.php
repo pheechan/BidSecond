@@ -287,7 +287,7 @@ $total_revenue_per_category = $pdo->query("
         }
 
         function editAuction(auctionId) {
-            window.open('edit_auction.php?auction_id=' + auctionId, '_blank', 'width=600,height=600');
+            window.location.href = 'edit_auction.php?auction_id=' + auctionId;
         }
 
         // Transaction tab switch
@@ -517,9 +517,10 @@ document.addEventListener('DOMContentLoaded', function () {
                                     <td><?php echo $auction['end_time']; ?></td>
                                     <td><?php echo $auction['created_at']; ?></td>
                                     <td>
-                                        <button class="delete-auction" data-auction-id="<?php echo $auction['auction_id']; ?>" onclick="deleteAuction(<?php echo $auction['auction_id']; ?>)">Delete</button>
-                                        <button class="edit-auction" data-auction-id="<?php echo $auction['auction_id']; ?>" onclick="editAuction(<?php echo $auction['auction_id']; ?>)">Edit</button>
-                                        <button class="remove-image" data-auction-id="<?php echo $auction['auction_id']; ?>" onclick="removeImage(<?php echo $auction['auction_id']; ?>)">Remove Image</button>
+                        
+                                        <button class="edit-auction" style="background: #57a05a; color: #fff; border: none; border-radius: 5px; padding: 6px 14px; margin: 2px; cursor: pointer; transition: background 0.2s;" onclick="editAuction(<?php echo $auction['auction_id']; ?>)">
+                                            ✏️ Edit
+                                        </button>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
