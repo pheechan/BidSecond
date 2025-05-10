@@ -327,7 +327,44 @@ $total_revenue_per_category = $pdo->query("
                 data: <?php echo json_encode(array_map('floatval', array_column($total_revenue_per_category, 'total_revenue'))); ?>
             }
         };
+
+        const summaryLabels = ['Users', 'Auctions', 'Bids', 'Top-Ups', 'Withdrawals'];
+        const summaryData = [
+            <?php echo count($users); ?>,
+            <?php echo count($auctions); ?>,
+            <?php echo count($top_bids); ?>,
+            <?php echo array_sum(array_column($topups, 'topup_amount')); ?>,
+            <?php echo array_sum(array_column($withdraws, 'withdraw_amount')); ?>
+        ];
+
+        const moneyLabels = ['Top-Ups', 'Withdrawals'];
+        const moneyData = [
+            <?php echo array_sum(array_column($topups, 'topup_amount')); ?>,
+            <?php echo array_sum(array_column($withdraws, 'withdraw_amount')); ?>
+        ];
     </script>
+    <script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Pie Chart: Money Flow
+    const pieCtx = document.getElementById('summary-pie').getContext('2d');
+    new Chart(pieCtx, {
+        type: 'pie',
+        data: {
+            labels: moneyLabels,
+            datasets: [{
+                data: moneyData,
+                backgroundColor: ['#4285f4', '#ea4335']
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'bottom' }
+            }
+        }
+    });
+});
+</script>
 </head>
 <body>
     <!-- Welcome Screen -->
@@ -365,15 +402,15 @@ $total_revenue_per_category = $pdo->query("
                     <h2>Summary</h2>
                     <div class="summary-container">
                         <div class="summary-card">
-                            <h3>Total Users</h3>
+                            <h3>Users</h3>
                             <p><?php echo count($users); ?></p>
                         </div>
                         <div class="summary-card">
-                            <h3>Total Auctions</h3>
+                            <h3>Auctions</h3>
                             <p><?php echo count($auctions); ?></p>
                         </div>
                         <div class="summary-card">
-                            <h3>Total Bids</h3>
+                            <h3>Bids</h3>
                             <p><?php echo count($top_bids); ?></p>
                         </div>
                         <div class="summary-card">
@@ -383,6 +420,14 @@ $total_revenue_per_category = $pdo->query("
                         <div class="summary-card">
                             <h3>Withdrawals</h3>
                             <p>฿<?php echo number_format(array_sum(array_column($withdraws, 'withdraw_amount')), 2); ?></p>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 40px; margin-top: 40px;">
+                        <div style="flex:1;">
+                        </div>
+                        <div style="flex:1;">
+                            <h3 style="text-align:center;">Money Flow</h3>
+                            <canvas id="summary-pie" height="300"></canvas>
                         </div>
                     </div>
                 </section>
