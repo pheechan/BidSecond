@@ -22,7 +22,16 @@ $pdo = new PDO(
 $message = '';
 $auction_id = isset($_GET['auction_id']) ? intval($_GET['auction_id']) : 0;
 
-// Handle form submission
+// Handle image deletion FIRST
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_image'], $_POST['auction_id'])) {
+    $auction_id = intval($_POST['auction_id']);
+    $stmt = $pdo->prepare("UPDATE AUCTIONS SET image = NULL WHERE auction_id = ?");
+    $stmt->execute([$auction_id]);
+    header("Location: edit_auction.php?auction_id=" . $auction_id . "&success=1");
+    exit();
+}
+
+// Handle form submission (update auction)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['auction_id'])) {
     $auction_id = intval($_POST['auction_id']);
     $title = trim($_POST['title']);
@@ -49,16 +58,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['auction_id'])) {
     } else {
         $message = "Failed to update auction.";
     }
-}
-
-// Handle image deletion
-if (isset($_POST['delete_image']) && isset($_POST['auction_id'])) {
-    $auction_id = intval($_POST['auction_id']);
-    $stmt = $pdo->prepare("UPDATE AUCTIONS SET image = NULL WHERE auction_id = ?");
-    $stmt->execute([$auction_id]);
-    // Reload to show the updated state
-    header("Location: edit_auction.php?auction_id=" . $auction_id . "&success=1");
-    exit();
 }
 
 // Fetch auction details
@@ -181,9 +180,15 @@ $statuses = ["active", "pending", "ended"];
             <?php if (!empty($auction['image'])): ?>
                 <img src="data:image/jpeg;base64,<?php echo base64_encode($auction['image']); ?>" alt="Auction Image">
             <?php endif; ?>
-
             <button type="submit">Save Changes</button>
         </form>
+
+        <?php if (!empty($auction['image'])): ?>
+            <form method="POST" style="margin-top:10px;">
+                <input type="hidden" name="auction_id" value="<?php echo $auction_id; ?>">
+                <button type="submit" name="delete_image" value="1" style="background:#ea4335;color:#fff;border:none;padding:8px 16px;border-radius:5px;cursor:pointer;">Delete Image</button>
+            </form>
+        <?php endif; ?>
     </div>
 </body>
 </html>
