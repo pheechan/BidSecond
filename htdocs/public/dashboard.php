@@ -292,8 +292,9 @@ $total_revenue_per_category = $pdo->query("
 
         // Transaction tab switch
         function showTransactionTable(type) {
-            document.querySelectorAll('.transaction-table').forEach(e=>e.style.display='none');
-            document.getElementById(type+'-table').style.display='block';
+            document.querySelectorAll('.transaction-table').forEach(e => e.style.display = 'none');
+            var table = document.getElementById(type + '-table');
+            if (table) table.style.display = 'block';
         }
     </script>
     <script>
@@ -545,11 +546,64 @@ document.addEventListener('DOMContentLoaded', function () {
                     </select>
 
                     <div id="topups-table" class="transaction-table">
-                        <!-- Top-Ups Table Here -->
+                        <h3>Top-Ups</h3>
+                        <table class="styled-table">
+                            <thead>
+                                <tr>
+                                    <th>User ID</th>
+                                    <th>Top-Up Amount</th>
+                                    <th>Status</th>
+                                    <th>Top-Up Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php
+                                $topups_per_page = 10;
+                                $total_topups = count($topups);
+                                $total_pages = ceil($total_topups / $topups_per_page);
+                                $current_page = isset($_GET['topup_page']) ? (int)$_GET['topup_page'] : 1;
+                                $start_index = ($current_page - 1) * $topups_per_page;
+                                $paginated_topups = array_slice($topups, $start_index, $topups_per_page);
+
+                                foreach ($paginated_topups as $topup): ?>
+                                    <tr>
+                                        <td><?php echo htmlspecialchars($topup['user_id']); ?></td>
+                                        <td>฿<?php echo number_format($topup['topup_amount'], 2); ?></td>
+                                        <td><?php echo $topup['status'] ? 'Approved' : 'Pending'; ?></td>
+                                        <td><?php echo $topup['topup_date']; ?></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                        <div class="pagination">
+                            <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                                <a href="?connect=true&tab=transactions&topup_page=<?php echo $i; ?>" class="<?php echo $i === $current_page ? 'active' : ''; ?>"><?php echo $i; ?></a>
+                            <?php endfor; ?>
+                        </div>
                     </div>
+
                     <div id="withdraws-table" class="transaction-table" style="display:none">
-                        <!-- Withdraw Table Here -->
+                        <h3>Withdraw</h3>
+                        <table class="styled-table">
+                            <thead>
+                                <tr>
+                                    <th>User ID</th>
+                                    <th>Withdraw Amount</th>
+                                    <th>Withdraw Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($withdraws as $row): ?>
+                                <tr>
+                                    <td><?php echo htmlspecialchars($row['user_id']); ?></td>
+                                    <td>฿<?php echo number_format($row['withdraw_amount'], 2); ?></td>
+                                    <td><?php echo $row['withdraw_date']; ?></td>
+                                </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
                     </div>
+
                     <div id="spend-table" class="transaction-table" style="display:none">
                         <h3>Spend (BUY_HISTORY)</h3>
                         <table class="styled-table">
@@ -571,6 +625,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             </tbody>
                         </table>
                     </div>
+
                     <div id="income-table" class="transaction-table" style="display:none">
                         <h3>Income (SELL_HISTORY)</h3>
                         <table class="styled-table">
@@ -591,44 +646,6 @@ document.addEventListener('DOMContentLoaded', function () {
                                 <?php endforeach; ?>
                             </tbody>
                         </table>
-                    </div>
-
-                    <!-- Top-Up Table -->
-                    <h3>Top-Ups</h3>
-                    <table class="styled-table">
-                        <thead>
-                            <tr>
-                                <th>User ID</th>
-                                <th>Top-Up Amount</th>
-                                <th>Status</th>
-                                <th>Top-Up Date</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php
-                            $topups_per_page = 10;
-                            $total_topups = count($topups);
-                            $total_pages = ceil($total_topups / $topups_per_page);
-                            $current_page = isset($_GET['topup_page']) ? (int)$_GET['topup_page'] : 1;
-                            $start_index = ($current_page - 1) * $topups_per_page;
-                            $paginated_topups = array_slice($topups, $start_index, $topups_per_page);
-
-                            foreach ($paginated_topups as $topup): ?>
-                                <tr>
-                                    <td><?php echo htmlspecialchars($topup['user_id']); ?></td>
-                                    <td>฿<?php echo number_format($topup['topup_amount'], 2); ?></td>
-                                    <td><?php echo $topup['status'] ? 'Approved' : 'Pending'; ?></td>
-                                    <td><?php echo $topup['topup_date']; ?></td>
-                                </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
-
-                    <!-- Pagination for Top-Ups -->
-                    <div class="pagination">
-                        <?php for ($i = 1; $i <= $total_pages; $i++): ?>
-                            <a href="?connect=true&tab=transactions&topup_page=<?php echo $i; ?>" class="<?php echo $i === $current_page ? 'active' : ''; ?>"><?php echo $i; ?></a>
-                        <?php endfor; ?>
                     </div>
                 </section>
 
