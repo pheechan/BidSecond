@@ -46,6 +46,85 @@ $server_info = [
     'timezone' => date_default_timezone_get(),
 ];
 
+// Filtering
+if (isset($_GET['sort_by'])) {
+    $sort_by = $_GET['sort_by'];
+    $sort_order = ($_GET['sort_order'] ?? 'asc') === 'desc' ? 'desc' : 'asc';
+
+    // Filter for Email Verified
+    if ($sort_by === 'email_verified' && isset($_GET['email_verified_filter']) && $_GET['email_verified_filter'] !== '') {
+        $users = array_filter($users, function($u) {
+            return $u['email_verified'] == $_GET['email_verified_filter'];
+        });
+    }
+    // Filter for Role
+    if ($sort_by === 'roles' && isset($_GET['role_filter']) && $_GET['role_filter'] !== '') {
+        $users = array_filter($users, function($u) {
+            return $u['roles'] == $_GET['role_filter'];
+        });
+    }
+
+    // Sorting
+    usort($users, function($a, $b) use ($sort_by, $sort_order) {
+        if ($sort_by === 'balance') {
+            $cmp = $a['balance'] <=> $b['balance'];
+        } elseif ($sort_by === 'email_verified') {
+            $cmp = $a['email_verified'] <=> $b['email_verified'];
+        } elseif ($sort_by === 'roles') {
+            $cmp = strcmp($a['roles'], $b['roles']);
+        } elseif ($sort_by === 'created_at') {
+            $cmp = strtotime($a['created_at']) <=> strtotime($b['created_at']);
+        } else {
+            $cmp = strcmp($a[$sort_by], $b[$sort_by]);
+        }
+        return $sort_order === 'asc' ? $cmp : -$cmp;
+    });
+}
+
+if (!empty($_GET['user_search'])) {
+    $search = mb_strtolower(trim($_GET['user_search']));
+    $users = array_filter($users, function($u) use ($search) {
+        return mb_strpos(mb_strtolower($u['username']), $search) !== false;
+    });
+}
+
+if (isset($_GET['auction_sort_by'])) {
+    $sort_by = $_GET['auction_sort_by'];
+    $sort_order = ($_GET['auction_sort_order'] ?? 'asc') === 'desc' ? 'desc' : 'asc';
+
+    // Filter for Category
+    if ($sort_by === 'category' && isset($_GET['auction_category_filter']) && $_GET['auction_category_filter'] !== '') {
+        $auctions = array_filter($auctions, function($a) {
+            return $a['category'] == $_GET['auction_category_filter'];
+        });
+    }
+    // Filter for Status
+    if ($sort_by === 'status' && isset($_GET['auction_status_filter']) && $_GET['auction_status_filter'] !== '') {
+        $auctions = array_filter($auctions, function($a) {
+            return $a['status'] == $_GET['auction_status_filter'];
+        });
+    }
+
+    // Sorting
+    usort($auctions, function($a, $b) use ($sort_by, $sort_order) {
+        if (in_array($sort_by, ['start_price', 'bid_amount'])) {
+            $cmp = $a[$sort_by] <=> $b[$sort_by];
+        } elseif (in_array($sort_by, ['end_time', 'created_at'])) {
+            $cmp = strtotime($a[$sort_by]) <=> strtotime($b[$sort_by]);
+        } else {
+            $cmp = strcmp($a[$sort_by], $b[$sort_by]);
+        }
+        return $sort_order === 'asc' ? $cmp : -$cmp;
+    });
+}
+
+if (!empty($_GET['auction_search'])) {
+    $search = mb_strtolower(trim($_GET['auction_search']));
+    $auctions = array_filter($auctions, function($a) use ($search) {
+        return mb_strpos(mb_strtolower($a['title']), $search) !== false;
+    });
+}
+
 // Fetch data for Report and Analytics
 
 // Top 20 Highest Bids
@@ -366,6 +445,23 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 </script>
+<script>
+function handleSortByChange() {
+    var sortBy = document.getElementById('sort-by').value;
+    document.getElementById('email-verified-filter').style.display = (sortBy === 'email_verified') ? 'inline-block' : 'none';
+    document.getElementById('role-filter').style.display = (sortBy === 'roles') ? 'inline-block' : 'none';
+}
+// Run on page load to show correct filter
+document.addEventListener('DOMContentLoaded', handleSortByChange);
+</script>
+<script>
+function handleAuctionSortByChange() {
+    var sortBy = document.getElementById('auction-sort-by').value;
+    document.getElementById('auction-category-filter').style.display = (sortBy === 'category') ? 'inline-block' : 'none';
+    document.getElementById('auction-status-filter').style.display = (sortBy === 'status') ? 'inline-block' : 'none';
+}
+document.addEventListener('DOMContentLoaded', handleAuctionSortByChange);
+</script>
 </head>
 <body>
     <!-- Welcome Screen -->
@@ -434,6 +530,49 @@ document.addEventListener('DOMContentLoaded', function () {
                 <!-- User Management Section -->
                 <section id="user-management" class="tab-content">
                     <h2>User Management</h2>
+                    <!-- Search Form for User Management -->
+                    <form method="GET" style="margin-bottom: 14px; display: flex; gap: 10px; align-items: center;">
+                        <input type="hidden" name="connect" value="true">
+                        <input type="hidden" name="tab" value="user-management">
+                        <input type="text" name="user_search" placeholder="Search Username..." value="<?php echo htmlspecialchars($_GET['user_search'] ?? ''); ?>" style="padding: 7px 12px; border-radius: 5px; border: 1px solid #ccc;">
+                        <button type="submit" style="padding: 7px 18px; border-radius: 5px; background: #57a05a; color: #fff; border: none;">Search</button>
+                    </form>
+                    <!-- Sort/Filter Form for User Management -->
+                    <form id="user-sort-form" method="GET" style="margin-bottom: 18px; display: flex; gap: 12px; align-items: center;">
+                        <input type="hidden" name="connect" value="true">
+                        <input type="hidden" name="tab" value="user-management">
+                        <label for="sort-by">Sort by:</label>
+                        <select name="sort_by" id="sort-by" onchange="handleSortByChange()">
+                            <option value="username" <?php if ($_GET['sort_by'] ?? '' === 'username') echo 'selected'; ?>>Username</option>
+                            <option value="email" <?php if ($_GET['sort_by'] ?? '' === 'email') echo 'selected'; ?>>Email</option>
+                            <option value="email_verified" <?php if ($_GET['sort_by'] ?? '' === 'email_verified') echo 'selected'; ?>>Email Verified</option>
+                            <option value="balance" <?php if ($_GET['sort_by'] ?? '' === 'balance') echo 'selected'; ?>>Balance</option>
+                            <option value="roles" <?php if ($_GET['sort_by'] ?? '' === 'roles') echo 'selected'; ?>>Role</option>
+                            <option value="created_at" <?php if ($_GET['sort_by'] ?? '' === 'created_at') echo 'selected'; ?>>Created At</option>
+                        </select>
+
+                        <!-- Email Verified filter -->
+                        <select name="email_verified_filter" id="email-verified-filter" style="display:none;">
+                            <option value="">-- Select Status --</option>
+                            <option value="1" <?php if (($_GET['email_verified_filter'] ?? '') === '1') echo 'selected'; ?>>Approved</option>
+                            <option value="0" <?php if (($_GET['email_verified_filter'] ?? '') === '0') echo 'selected'; ?>>Not Approved</option>
+                        </select>
+
+                        <!-- Role filter -->
+                        <select name="role_filter" id="role-filter" style="display:none;">
+                            <option value="">-- Select Role --</option>
+                            <option value="admin" <?php if (($_GET['role_filter'] ?? '') === 'admin') echo 'selected'; ?>>Admin</option>
+                            <option value="user" <?php if (($_GET['role_filter'] ?? '') === 'user') echo 'selected'; ?>>User</option>
+                        </select>
+
+                        <label style="margin-left:10px;">
+                            <input type="radio" name="sort_order" value="asc" <?php if (($_GET['sort_order'] ?? 'asc') === 'asc') echo 'checked'; ?>> Asc
+                        </label>
+                        <label>
+                            <input type="radio" name="sort_order" value="desc" <?php if (($_GET['sort_order'] ?? '') === 'desc') echo 'checked'; ?>> Desc
+                        </label>
+                        <button type="submit">Submit</button>
+                    </form>
                     <table class="styled-table">
                         <thead>
                             <tr>
@@ -486,6 +625,58 @@ document.addEventListener('DOMContentLoaded', function () {
                 <!-- Auction Management Section -->
                 <section id="auction-management" class="tab-content">
                     <h2>Auction Management</h2>
+                    <form method="GET" style="margin-bottom: 14px; display: flex; gap: 10px; align-items: center;">
+                        <input type="hidden" name="connect" value="true">
+                        <input type="hidden" name="tab" value="auction-management">
+                        <input type="text" name="auction_search" placeholder="Search Title..." value="<?php echo htmlspecialchars($_GET['auction_search'] ?? ''); ?>" style="padding: 7px 12px; border-radius: 5px; border: 1px solid #ccc;">
+                        <button type="submit" style="padding: 7px 18px; border-radius: 5px; background: #57a05a; color: #fff; border: none;">Search</button>
+                    </form>
+                    <form id="auction-sort-form" method="GET" style="margin-bottom: 18px; display: flex; gap: 12px; align-items: center;">
+                        <input type="hidden" name="connect" value="true">
+                        <input type="hidden" name="tab" value="auction-management">
+                        <label for="auction-sort-by">Sort by:</label>
+                        <select name="auction_sort_by" id="auction-sort-by" onchange="handleAuctionSortByChange()">
+                            <option value="title" <?php if ($_GET['auction_sort_by'] ?? '' === 'title') echo 'selected'; ?>>Title</option>
+                            <option value="category" <?php if ($_GET['auction_sort_by'] ?? '' === 'category') echo 'selected'; ?>>Category</option>
+                            <option value="start_price" <?php if ($_GET['auction_sort_by'] ?? '' === 'start_price') echo 'selected'; ?>>Start Price</option>
+                            <option value="bid_amount" <?php if ($_GET['auction_sort_by'] ?? '' === 'bid_amount') echo 'selected'; ?>>Current Bid</option>
+                            <option value="status" <?php if ($_GET['auction_sort_by'] ?? '' === 'status') echo 'selected'; ?>>Status</option>
+                            <option value="end_time" <?php if ($_GET['auction_sort_by'] ?? '' === 'end_time') echo 'selected'; ?>>End Time</option>
+                            <option value="created_at" <?php if ($_GET['auction_sort_by'] ?? '' === 'created_at') echo 'selected'; ?>>Created At</option>
+                        </select>
+
+                        <!-- Category filter -->
+                        <select name="auction_category_filter" id="auction-category-filter" style="display:none;">
+                            <option value="">-- Select Category --</option>
+                            <option value="Electronics" <?php if (($_GET['auction_category_filter'] ?? '') === 'Electronics') echo 'selected'; ?>>Electronics</option>
+                            <option value="Fashion" <?php if (($_GET['auction_category_filter'] ?? '') === 'Fashion') echo 'selected'; ?>>Fashion</option>
+                            <option value="Home and Garden" <?php if (($_GET['auction_category_filter'] ?? '') === 'Home and Garden') echo 'selected'; ?>>Home and Garden</option>
+                            <option value="Toys and Games" <?php if (($_GET['auction_category_filter'] ?? '') === 'Toys and Games') echo 'selected'; ?>>Toys and Games</option>
+                            <option value="Automotive" <?php if (($_GET['auction_category_filter'] ?? '') === 'Automotive') echo 'selected'; ?>>Automotive</option>
+                            <option value="Sports and Outdoors" <?php if (($_GET['auction_category_filter'] ?? '') === 'Sports and Outdoors') echo 'selected'; ?>>Sports and Outdoors</option>
+                            <option value="Books and Media" <?php if (($_GET['auction_category_filter'] ?? '') === 'Books and Media') echo 'selected'; ?>>Books and Media</option>
+                            <option value="Health and Beauty" <?php if (($_GET['auction_category_filter'] ?? '') === 'Health and Beauty') echo 'selected'; ?>>Health and Beauty</option>
+                            <option value="Jewelry and Watches" <?php if (($_GET['auction_category_filter'] ?? '') === 'Jewelry and Watches') echo 'selected'; ?>>Jewelry and Watches</option>
+                            <option value="Music and Instruments" <?php if (($_GET['auction_category_filter'] ?? '') === 'Music and Instruments') echo 'selected'; ?>>Music and Instruments</option>
+                            <option value="Collectibles and Antiques" <?php if (($_GET['auction_category_filter'] ?? '') === 'Collectibles and Antiques') echo 'selected'; ?>>Collectibles and Antiques</option>
+                            <option value="Art and Craft" <?php if (($_GET['auction_category_filter'] ?? '') === 'Art and Craft') echo 'selected'; ?>>Art and Craft</option>
+                        </select>
+
+                        <!-- Status filter -->
+                        <select name="auction_status_filter" id="auction-status-filter" style="display:none;">
+                            <option value="">-- Select Status --</option>
+                            <option value="active" <?php if (($_GET['auction_status_filter'] ?? '') === 'active') echo 'selected'; ?>>Active</option>
+                            <option value="pending" <?php if (($_GET['auction_status_filter'] ?? '') === 'pending') echo 'selected'; ?>>Pending</option>
+                        </select>
+
+                        <label style="margin-left:10px;">
+                            <input type="radio" name="auction_sort_order" value="asc" <?php if (($_GET['auction_sort_order'] ?? 'asc') === 'asc') echo 'checked'; ?>> Asc
+                        </label>
+                        <label>
+                            <input type="radio" name="auction_sort_order" value="desc" <?php if (($_GET['auction_sort_order'] ?? '') === 'desc') echo 'checked'; ?>> Desc
+                        </label>
+                        <button type="submit">Submit</button>
+                    </form>
                     <table class="styled-table">
                         <thead>
                             <tr>
