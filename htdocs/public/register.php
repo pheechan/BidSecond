@@ -111,11 +111,11 @@ if (empty($_POST["send"]) && empty($_POST["verify_otp"]) && empty($_POST["genera
         die("Database connection failed: " . mysqli_connect_error());
     }
 
-    // Fetch OTP and username from the database
-    $stmt = $link->prepare("SELECT otp_code, username FROM USERS WHERE email = ? AND email_verified = 0");
+    // Fetch OTP, username, and user_id from the database
+    $stmt = $link->prepare("SELECT otp_code, username, user_id, roles FROM USERS WHERE email = ? AND email_verified = 0");
     $stmt->bind_param("s", $email);
     $stmt->execute();
-    $stmt->bind_result($otp_in_db, $name); // Fetch both OTP and username
+    $stmt->bind_result($otp_in_db, $name, $user_id, $roles); // Fetch OTP, username, and user_id
     $stmt->fetch();
 
     if ($entered_otp == $otp_in_db) {
@@ -127,9 +127,10 @@ if (empty($_POST["send"]) && empty($_POST["verify_otp"]) && empty($_POST["genera
 
         // Store user information in the session (backend process)
         $_SESSION['user'] = [
-            'name' => $name, // Use the username fetched from the database
+            'user_id' => $user_id,
+            'name' => $name,
             'email' => $email,
-            //'role' => $role,
+            'roles' => $roles, 
         ];
 
         // Render the success page
